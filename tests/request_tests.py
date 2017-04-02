@@ -51,6 +51,16 @@ class RequestTestCase(TestCase):
         request.query_string = 'page=1&order=price'
         self.assertEqual(request.query, {'page': '1', 'order': 'price'})
 
+    def test_ip(self):
+        request = RequestMock()
+        request.ip = '127.0.0.1'
+        self.assertEqual(request.ip, '127.0.0.1')
+
+    def test_ip_with_x_forwarded_for_header(self):
+        request = RequestMock()
+        request.env['HTTP_X_FORWARDED_FOR'] = '203.0.113.195, 70.41.3.18, 150.172.238.178'
+        self.assertEqual(request.ip, '203.0.113.195')
+
     def test_form(self):
         request = RequestMock()
         request.method = 'POST'

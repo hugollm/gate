@@ -55,6 +55,13 @@ class Request(object):
         return self._query
 
     @property
+    def ip(self):
+        try:
+            return self.env['HTTP_X_FORWARDED_FOR'].split(',')[0].strip()
+        except KeyError:
+            return self.env['REMOTE_ADDR']
+
+    @property
     def form(self):
         if self._form is None:
             self._form = {}

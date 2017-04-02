@@ -55,6 +55,10 @@ class RequestMock(Request):
         return super(RequestMock, self).query_string
 
     @property
+    def ip(self):
+        return super(RequestMock, self).ip
+
+    @property
     def body(self):
         return super(RequestMock, self).body
 
@@ -77,6 +81,10 @@ class RequestMock(Request):
     @query_string.setter
     def query_string(self, query_string):
         self.env['QUERY_STRING'] = query_string
+
+    @ip.setter
+    def ip(self, ip):
+        self.env['REMOTE_ADDR'] = ip
 
     @body.setter
     def body(self, body):
