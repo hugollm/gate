@@ -82,3 +82,14 @@ class RequestTestCase(TestCase):
         env['HTTP_X_FORWARDED_FOR'] = '203.0.113.195, 70.41.3.18, 150.172.238.178'
         request = Request(env)
         self.assertEqual(request.ip, '203.0.113.195')
+
+    def test_referer(self):
+        env = mock_env()
+        env['HTTP_REFERER'] = 'http://localhost:8000/app/hello'
+        request = Request(env)
+        self.assertEqual(request.referer, 'http://localhost:8000/app/hello')
+
+    def test_empty_referer(self):
+        env = mock_env()
+        request = Request(env)
+        self.assertIsNone(request.referer)

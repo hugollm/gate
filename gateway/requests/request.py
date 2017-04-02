@@ -67,3 +67,7 @@ class Request(object):
             return self.env['HTTP_X_FORWARDED_FOR'].split(',')[0].strip()
         except KeyError:
             return self.env['REMOTE_ADDR']
+
+    @property
+    def referer(self):
+        return self.env.get('HTTP_REFERER')
