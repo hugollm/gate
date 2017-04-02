@@ -60,6 +60,23 @@ class RequestTestCase(TestCase):
         request = Request(env)
         self.assertEqual(request.query, {'page': '1', 'order': 'price'})
 
+    def test_headers(self):
+        env = mock_env()
+        env['HTTP_AUTH'] = 'token'
+        env['HTTP_X_FORWARDED_FOR'] = '203.0.113.195, 70.41.3.18, 150.172.238.178'
+        request = Request(env)
+        self.assertEqual(request.headers, {
+            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'accept-encoding': 'gzip, deflate, sdch',
+            'accept-language': 'pt-BR,pt;q=0.8,en-US;q=0.6,en;q=0.4',
+            'auth': 'token',
+            'connection': 'keep-alive',
+            'host': 'localhost:8000',
+            'upgrade-insecure-requests': '1',
+            'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36',
+            'x-forwarded-for': '203.0.113.195, 70.41.3.18, 150.172.238.178',
+        })
+
     def test_cookies(self):
         env = mock_env()
         env['HTTP_COOKIE'] = 'foo=bar; bar=biz'

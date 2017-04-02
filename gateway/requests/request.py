@@ -8,6 +8,7 @@ class Request(object):
         self.env = env
         self._body = None
         self._query = None
+        self._headers = None
         self._cookies = None
 
     @property
@@ -42,6 +43,16 @@ class Request(object):
         if self._query is None:
             self._query = dict(parse_qsl(self.query_string, keep_blank_values=True))
         return self._query
+
+    @property
+    def headers(self):
+        if self._headers is None:
+            self._headers = {}
+            for key, value in self.env.items():
+                if key.startswith('HTTP_'):
+                    new_key = key[5:].lower().replace('_', '-')
+                    self._headers[new_key] = value
+        return self._headers
 
     @property
     def cookies(self):
