@@ -46,3 +46,9 @@ class RequestTestCase(TestCase):
         request = RequestMock()
         request.query_string = 'page=1&order=price'
         self.assertEqual(request.query, {'page': '1', 'order': 'price'})
+
+    def test_form(self):
+        request = RequestMock()
+        request.method = 'POST'
+        request.body = b'page=1&order=price'
+        self.assertEqual(request.form, {'page': '1', 'order': 'price'})
