@@ -1,0 +1,3 @@
+#!/bin/bash
+coverage run --source=gateway -m unittest tests
+coverage report -m
