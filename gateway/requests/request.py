@@ -86,3 +86,7 @@ class Request(object):
     @property
     def referer(self):
         return self.env.get('HTTP_REFERER')
+
+    @property
+    def user_agent(self):
+        return self.env.get('HTTP_USER_AGENT')

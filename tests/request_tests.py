@@ -119,3 +119,14 @@ class RequestTestCase(TestCase):
         env = mock_env()
         request = Request(env)
         self.assertIsNone(request.referer)
+
+    def test_user_agent(self):
+        env = mock_env()
+        request = Request(env)
+        self.assertEqual(request.user_agent, 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36')
+
+    def test_empty_user_agent(self):
+        env = mock_env()
+        env.pop('HTTP_USER_AGENT')
+        request = Request(env)
+        self.assertEqual(request.user_agent, None)
