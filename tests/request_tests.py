@@ -60,6 +60,17 @@ class RequestTestCase(TestCase):
         request = Request(env)
         self.assertEqual(request.query, {'page': '1', 'order': 'price'})
 
+    def test_cookies(self):
+        env = mock_env()
+        env['HTTP_COOKIE'] = 'foo=bar; bar=biz'
+        request = Request(env)
+        self.assertEqual(request.cookies, {'foo': 'bar', 'bar': 'biz'})
+
+    def test_empty_cookies(self):
+        env = mock_env()
+        request = Request(env)
+        self.assertEqual(request.cookies, {})
+
     def test_ip(self):
         env = mock_env()
         env['REMOTE_ADDR'] = '127.0.0.1'

@@ -1,3 +1,4 @@
+from http.cookies import SimpleCookie
 from urllib.parse import parse_qsl
 
 
@@ -7,6 +8,7 @@ class Request(object):
         self.env = env
         self._body = None
         self._query = None
+        self._cookies = None
 
     @property
     def method(self):
@@ -40,6 +42,18 @@ class Request(object):
         if self._query is None:
             self._query = dict(parse_qsl(self.query_string, keep_blank_values=True))
         return self._query
+
+    @property
+    def cookies(self):
+        if self._cookies is None:
+            cookie_string = self.env.get('HTTP_COOKIE')
+            if cookie_string:
+                cookies = SimpleCookie()
+                cookies.load(cookie_string)
+                self._cookies = {key: cookies[key].value for key in cookies}
+            else:
+                self._cookies = {}
+        return self._cookies
 
     @property
     def body(self):
