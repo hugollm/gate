@@ -6,7 +6,7 @@ class Request(object):
 
     @property
     def method(self):
-        return self.env.get('REQUEST_METHOD')
+        return self.env['REQUEST_METHOD']
 
     @property
     def url(self):
@@ -17,22 +17,22 @@ class Request(object):
 
     @property
     def scheme(self):
-        return self.env.get('wsgi.url_scheme')
+        return self.env['wsgi.url_scheme']
 
     @property
     def host(self):
-        return self.env.get('HTTP_HOST')
+        return self.env['HTTP_HOST']
 
     @property
     def path(self):
-        return self.env.get('PATH_INFO')
+        return self.env['PATH_INFO']
 
     @property
     def query_string(self):
-        return self.env.get('QUERY_STRING')
+        return self.env['QUERY_STRING']
 
     @property
     def body(self):
         if self._body is None:
-            self._body = self.env.get('wsgi.input').read()
+            self._body = self.env['wsgi.input'].read()
         return self._body
