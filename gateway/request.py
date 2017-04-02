@@ -1,5 +1,7 @@
 import cgi
 from urllib.parse import parse_qsl
+from warnings import warn
+
 from .request_file import RequestFile
 
 
@@ -70,6 +72,8 @@ class Request(object):
                 item = self.cgi_form[key]
                 if self._cgi_item_is_file(item):
                     self._files[key] = self._get_request_file_from_cgi_item(item)
+            if not self._files:
+                warn('Trying to get files from request but there\'s none. Are you missing enctype="multipart/form-data" in your form tag?')
         return self._files
 
     @property

@@ -1,5 +1,6 @@
 import os
 from unittest import TestCase
+from warnings import catch_warnings
 
 from gateway.exceptions import UploadTargetPathAlreadyExists
 from .request_mock import RequestMock
@@ -121,3 +122,11 @@ class RequestTestCase(TestCase):
         with self.assertRaises(UploadTargetPathAlreadyExists):
             photo.save(target)
         os.remove(target)
+
+    def test_accessing_files_while_none_is_sent_issues_warning_about_enctype(self):
+        request = RequestMock()
+        request.method = 'POST'
+        request.body = b'name=john&name=doe'
+        with catch_warnings(record=True) as w:
+            request.files
+            self.assertEqual(len(w), 1)
