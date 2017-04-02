@@ -41,3 +41,8 @@ class RequestTestCase(TestCase):
         request = RequestMock()
         request.body = b'<h1>Hello World</h1>'
         self.assertEqual(request.body, b'<h1>Hello World</h1>')
+
+    def test_query(self):
+        request = RequestMock()
+        request.query_string = 'page=1&order=price'
+        self.assertEqual(request.query, {'page': '1', 'order': 'price'})

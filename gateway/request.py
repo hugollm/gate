@@ -1,8 +1,12 @@
+from urllib.parse import parse_qsl
+
+
 class Request(object):
 
     def __init__(self, env):
         self.env = env
         self._body = None
+        self._query = None
 
     @property
     def method(self):
@@ -36,3 +40,9 @@ class Request(object):
         if self._body is None:
             self._body = self.env['wsgi.input'].read()
         return self._body
+
+    @property
+    def query(self):
+        if self._query is None:
+            self._query = dict(parse_qsl(self.query_string, keep_blank_values=True))
+        return self._query
