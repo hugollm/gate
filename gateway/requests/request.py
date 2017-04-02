@@ -23,6 +23,10 @@ class Request(object):
         return url
 
     @property
+    def base_url(self):
+        return self.scheme + '://' + self.host
+
+    @property
     def scheme(self):
         return self.env['wsgi.url_scheme']
 

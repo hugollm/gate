@@ -23,6 +23,15 @@ class RequestTestCase(TestCase):
         request = Request(env)
         self.assertEqual(request.url, 'https://myserver.com:8080/dashboard/products?page=1&order=price')
 
+    def test_base_url(self):
+        env = mock_env()
+        env['wsgi.url_scheme'] = 'https'
+        env['HTTP_HOST'] = 'myserver.com:8080'
+        env['PATH_INFO'] = '/dashboard/products'
+        env['QUERY_STRING'] = 'page=1&order=price'
+        request = Request(env)
+        self.assertEqual(request.base_url, 'https://myserver.com:8080')
+
     def test_scheme(self):
         env = mock_env()
         env['wsgi.url_scheme'] = 'https'
