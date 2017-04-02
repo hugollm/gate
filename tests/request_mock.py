@@ -80,6 +80,7 @@ class RequestMock(Request):
 
     @body.setter
     def body(self, body):
+        self.env['wsgi.input'] = BytesIO()
         self.env['wsgi.input'].write(body)
         self.env['wsgi.input'].seek(0)
         self._body = None

@@ -1,5 +1,6 @@
 import cgi
 from urllib.parse import parse_qsl
+from .request_file import RequestFile
 
 
 class Request(object):
@@ -9,6 +10,7 @@ class Request(object):
         self._body = None
         self._query = None
         self._form = None
+        self._files = None
         self._cgi_form = None
 
     @property
@@ -61,6 +63,16 @@ class Request(object):
         return self._form
 
     @property
+    def files(self):
+        if self._files is None:
+            self._files = {}
+            for key in self.cgi_form:
+                item = self.cgi_form[key]
+                if self._cgi_item_is_file(item):
+                    self._files[key] = self._get_request_file_from_cgi_item(item)
+        return self._files
+
+    @property
     def cgi_form(self):
         if self._cgi_form is None:
             self._cgi_form = cgi.FieldStorage(fp=self.env['wsgi.input'], environ=self.env)
@@ -69,3 +81,12 @@ class Request(object):
     def _cgi_item_is_file(self, item):
         test_subject = item[0] if isinstance(item, list) else item
         return bool(getattr(test_subject, 'filename', None))
+
+    def _get_request_file_from_cgi_item(self, item):
+        if isinstance(item, list):
+            files = []
+            for value in item:
+                files.append(RequestFile(value))
+            return files
+        else:
+            return RequestFile(item)
