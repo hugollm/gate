@@ -1,7 +1,7 @@
 import os
 from unittest import TestCase
 
-from gateway.requests.request import Request
+from gatekeeper.requests.request import Request
 from .factory import mock_env
 
 

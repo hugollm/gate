@@ -2,7 +2,7 @@ import os
 from unittest import TestCase
 from warnings import catch_warnings
 
-from gateway.requests.html_request import HtmlRequest, UploadTargetAlreadyExists
+from gatekeeper.requests.html_request import HtmlRequest, UploadTargetAlreadyExists
 from .factory import mock_env
 
 
@@ -64,7 +64,7 @@ class HtmlRequestTestCase(TestCase):
             env['wsgi.input'].seek(0)
         request = HtmlRequest(env)
         photo = request.files['photo']
-        target = '/tmp/gateway-test-save-file'
+        target = '/tmp/test-save-uploaded-file'
         if os.path.exists(target):
             os.remove(target)
         photo.save(target)
@@ -85,7 +85,7 @@ class HtmlRequestTestCase(TestCase):
             env['wsgi.input'].seek(0)
         request = HtmlRequest(env)
         photo = request.files['photo']
-        target = '/tmp/gateway-test-save-file'
+        target = '/tmp/test-save-uploaded-file'
         with open(target, 'wb') as f:
             f.write(b'hello world')
         with self.assertRaises(UploadTargetAlreadyExists):
