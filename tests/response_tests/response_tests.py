@@ -1,3 +1,6 @@
+from tempfile import NamedTemporaryFile
+from types import GeneratorType
+
 from unittest import TestCase
 from unittest.mock import Mock
 
@@ -26,3 +29,25 @@ class ResponseTestCase(TestCase):
         response = Response()
         response.body = 'hello world'
         self.assertEqual(response._wsgi_body(), (b'hello world',))
+
+    def test_file_gets_returned_as_generator_to_wsgi(self):
+        response = Response()
+        with NamedTemporaryFile() as tmpfile:
+            tmpfile.write(b'hello world')
+            tmpfile.seek(0)
+            response.file = tmpfile.name
+            start_respose = Mock()
+            self.assertIsInstance(response.wsgi(start_respose), GeneratorType)
+
+    def test_all_file_contents_are_yielded_by_its_generator(self):
+        response = Response()
+        with NamedTemporaryFile() as tmpfile:
+            tmpfile.write(b'hello world')
+            tmpfile.seek(0)
+            response.file = tmpfile.name
+            start_respose = Mock()
+            file_generator = response.wsgi(start_respose)
+            contents = b''
+            for chunk in file_generator:
+                contents += chunk
+            self.assertEqual(contents, b'hello world')
