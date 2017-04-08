@@ -114,3 +114,39 @@ class EndpointTestCase(TestCase):
         request = Request({'REQUEST_METHOD': 'GET', 'PATH_INFO': '/users'})
         response = endpoint.handle_request(request)
         self.assertEqual(request.args, {})
+
+    def test_endpoint_can_handle_raised_responses(self):
+        class RaiseEndpoint(Endpoint):
+            endpoint_path = '/users'
+            def get(self, request, response):
+                raise response
+        endpoint = RaiseEndpoint()
+        request = Request({'REQUEST_METHOD': 'GET', 'PATH_INFO': '/users'})
+        response = endpoint.handle_request(request)
+        self.assertIsInstance(response, Response)
+
+    def test_raising_response_on_before_request_jumps_main_method(self):
+        class RaiseEndpoint(Endpoint):
+            endpoint_path = '/users'
+            def before_request(self, request, response):
+                response.body = b'hello'
+                raise response
+            def get(self, request, response):
+                response.body += b' world'
+        endpoint = RaiseEndpoint()
+        request = Request({'REQUEST_METHOD': 'GET', 'PATH_INFO': '/users'})
+        response = endpoint.handle_request(request)
+        self.assertEqual(response.body, b'hello')
+
+    def test_raising_response_on_main_method_jumps_after_request(self):
+        class RaiseEndpoint(Endpoint):
+            endpoint_path = '/users'
+            def get(self, request, response):
+                response.body = b'hello'
+                raise response
+            def after_request(self, request, response):
+                response.body += b' world'
+        endpoint = RaiseEndpoint()
+        request = Request({'REQUEST_METHOD': 'GET', 'PATH_INFO': '/users'})
+        response = endpoint.handle_request(request)
+        self.assertEqual(response.body, b'hello')

@@ -27,17 +27,20 @@ class Endpoint(object):
         return hasattr(self, request.method.lower())
 
     def handle_request(self, request):
-        self.fill_request_args(request)
+        self._fill_request_args(request)
         response = Response()
         method = getattr(self, request.method.lower())
-        if hasattr(self, 'before_request'):
-            self.before_request(request, response)
-        method(request, response)
-        if hasattr(self, 'after_request'):
-            self.after_request(request, response)
+        try:
+            if hasattr(self, 'before_request'):
+                self.before_request(request, response)
+            method(request, response)
+            if hasattr(self, 'after_request'):
+                self.after_request(request, response)
+        except Response:
+            pass
         return response
 
-    def fill_request_args(self, request):
+    def _fill_request_args(self, request):
         request.args = {}
         if self._compiled_path_pattern:
             match = self._compiled_path_pattern.match(request.path)
