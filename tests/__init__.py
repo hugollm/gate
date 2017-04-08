@@ -7,5 +7,6 @@ from .response_tests.html_response_tests import HtmlResponseTestCase
 from .response_tests.json_response_tests import JsonResponseTestCase
 
 from .endpoint_tests.endpoint_tests import EndpointTestCase
+from .endpoint_tests.json_endpoint_tests import JsonEndpointTestCase
 
 from .app_tests import AppTestCase

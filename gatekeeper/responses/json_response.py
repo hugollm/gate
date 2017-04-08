@@ -7,3 +7,4 @@ class JsonResponse(Response):
         super(JsonResponse, self).__init__()
         self.headers['Content-Type'] = 'application/json; charset=utf-8'
         self.body = b'null'
+        self.json = {}

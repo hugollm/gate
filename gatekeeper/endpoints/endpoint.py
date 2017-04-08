@@ -28,7 +28,20 @@ class Endpoint(object):
 
     def handle_request(self, request):
         self._fill_request_args(request)
-        response = Response()
+        response = self._make_response()
+        self._execute_life_cycle(request, response)
+        return response
+
+    def _fill_request_args(self, request):
+        request.args = {}
+        if self._compiled_path_pattern:
+            match = self._compiled_path_pattern.match(request.path)
+            request.args = match.groupdict()
+
+    def _make_response(self):
+        return Response()
+
+    def _execute_life_cycle(self, request, response):
         method = getattr(self, request.method.lower())
         try:
             if hasattr(self, 'before_request'):
@@ -38,10 +51,3 @@ class Endpoint(object):
                 self.after_request(request, response)
         except Response:
             pass
-        return response
-
-    def _fill_request_args(self, request):
-        request.args = {}
-        if self._compiled_path_pattern:
-            match = self._compiled_path_pattern.match(request.path)
-            request.args = match.groupdict()
