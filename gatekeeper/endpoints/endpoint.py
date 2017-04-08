@@ -11,5 +11,7 @@ class Endpoint(object):
     def handle_request(self, request):
         response = Response()
         method = getattr(self, request.method.lower())
+        if hasattr(self, 'before_request'):
+            self.before_request(request, response)
         method(request, response)
         return response
