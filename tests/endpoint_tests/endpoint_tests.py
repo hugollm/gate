@@ -4,7 +4,6 @@ from unittest.mock import Mock
 from gatekeeper.requests.request import Request
 from gatekeeper.responses.response import Response
 from gatekeeper.endpoints.endpoint import Endpoint
-from . import endpoints
 
 
 class EndpointTestCase(TestCase):
@@ -37,9 +36,12 @@ class EndpointTestCase(TestCase):
         response = endpoint.handle_request(request)
         self.assertIsInstance(response, Response)
 
-    def test_simple_get_request(self):
-        endpoint = endpoints.SimpleGet()
+    def test_endpoint_method_can_change_response(self):
+        endpoint = Endpoint()
+        endpoint.endpoint_path = '/'
+        def get(self, request, response):
+            response.body = b'hello world'
+        endpoint.get = get.__get__(self, endpoint)
         request = Request({'REQUEST_METHOD': 'GET', 'PATH_INFO': '/'})
         response = endpoint.handle_request(request)
-        self.assertEqual(response.status, 200)
         self.assertEqual(response.body, b'hello world')
