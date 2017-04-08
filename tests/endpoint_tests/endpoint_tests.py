@@ -58,3 +58,16 @@ class EndpointTestCase(TestCase):
         request = Request({'REQUEST_METHOD': 'GET', 'PATH_INFO': '/'})
         response = endpoint.handle_request(request)
         self.assertEqual(response.body, b'hello world')
+
+    def test_endpoint_calls_before_request_method_if_defined(self):
+        endpoint = Endpoint()
+        endpoint.endpoint_path = '/'
+        def get(self, request, response):
+            response.body = b'hello'
+        def after_request(self, request, response):
+            response.body += b' world'
+        endpoint.get = get.__get__(self, endpoint)
+        endpoint.after_request = after_request.__get__(self, endpoint)
+        request = Request({'REQUEST_METHOD': 'GET', 'PATH_INFO': '/'})
+        response = endpoint.handle_request(request)
+        self.assertEqual(response.body, b'hello world')
