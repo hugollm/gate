@@ -51,3 +51,8 @@ class ResponseTestCase(TestCase):
             for chunk in file_generator:
                 contents += chunk
             self.assertEqual(contents, b'hello world')
+
+    def test_response_object_can_be_raised(self):
+        response = Response()
+        with self.assertRaises(Response):
+            raise response

@@ -1,7 +1,7 @@
 from http.client import responses as STATUS_MESSAGES
 
 
-class Response(object):
+class Response(BaseException):
 
     def __init__(self):
         self.status = 200

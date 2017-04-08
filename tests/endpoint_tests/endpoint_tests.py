@@ -99,18 +99,18 @@ class EndpointTestCase(TestCase):
         class ArgsEndpoint(Endpoint):
             endpoint_path = '/users/:id/:username/edit'
             def get(self, request, response):
-                response.args = request.args
+                pass
         endpoint = ArgsEndpoint()
         request = Request({'REQUEST_METHOD': 'GET', 'PATH_INFO': '/users/9/john/edit'})
         response = endpoint.handle_request(request)
-        self.assertEqual(response.args, {'id': '9', 'username': 'john'})
+        self.assertEqual(request.args, {'id': '9', 'username': 'john'})
 
     def test_endpoint_without_arguments_have_empty_dict_as_args(self):
         class ArgsEndpoint(Endpoint):
             endpoint_path = '/users'
             def get(self, request, response):
-                response.args = request.args
+                pass
         endpoint = ArgsEndpoint()
         request = Request({'REQUEST_METHOD': 'GET', 'PATH_INFO': '/users'})
         response = endpoint.handle_request(request)
-        self.assertEqual(response.args, {})
+        self.assertEqual(request.args, {})
