@@ -12,7 +12,7 @@ class AppTestCase(TestCase):
         env = {'REQUEST_METHOD': 'GET', 'PATH_INFO': '/'}
         start_response = Mock()
         body = app(env, start_response)
-        start_response.assert_called_once_with('404 Not Found', {'Content-Type': 'text/plain; charset=utf-8'}.items())
+        start_response.assert_called_once_with('404 Not Found', list({'Content-Type': 'text/plain; charset=utf-8'}.items()))
         self.assertEqual(body, (b'',))
 
     def test_app_routes_request_to_endpoint_if_it_matches(self):
@@ -25,7 +25,7 @@ class AppTestCase(TestCase):
         env = {'REQUEST_METHOD': 'GET', 'PATH_INFO': '/hello'}
         start_response = Mock()
         body = app(env, start_response)
-        start_response.assert_called_once_with('200 OK', {'Content-Type': 'text/plain; charset=utf-8'}.items())
+        start_response.assert_called_once_with('200 OK', list({'Content-Type': 'text/plain; charset=utf-8'}.items()))
         self.assertEqual(body, (b'hello world',))
 
     def test_app_does_not_route_request_to_endpoint_if_it_does_not_match(self):
@@ -38,5 +38,5 @@ class AppTestCase(TestCase):
         env = {'REQUEST_METHOD': 'GET', 'PATH_INFO': '/world'}
         start_response = Mock()
         body = app(env, start_response)
-        start_response.assert_called_once_with('404 Not Found', {'Content-Type': 'text/plain; charset=utf-8'}.items())
+        start_response.assert_called_once_with('404 Not Found', list({'Content-Type': 'text/plain; charset=utf-8'}.items()))
         self.assertEqual(body, (b'',))

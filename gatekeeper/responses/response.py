@@ -1,4 +1,5 @@
 from http.client import responses as STATUS_MESSAGES
+from http.cookies import SimpleCookie
 
 
 class Response(BaseException):
@@ -6,8 +7,25 @@ class Response(BaseException):
     def __init__(self):
         self.status = 200
         self.headers = {'Content-Type': 'text/plain; charset=utf-8'}
+        self.cookies = []
         self.body = b''
         self.file = None
+
+    def set_cookie(self, key, value, expires=None, domain=None, path=None, secure=False, http_only=True, same_site=True):
+        cookie = SimpleCookie({key: value}).get(key).OutputString()
+        if expires:
+            cookie += '; Expires=' + expires.strftime('%a, %d %b %Y %T') + ' GMT'
+        if domain:
+            cookie += '; Domain=' + domain
+        if path:
+            cookie += '; Path=' + path
+        if secure:
+            cookie += '; Secure'
+        if http_only:
+            cookie += '; HttpOnly'
+        if same_site:
+            cookie += '; SameSite=Strict'
+        self.cookies.append(cookie)
 
     def wsgi(self, start_respose):
         start_respose(self._wsgi_status(), self._wsgi_headers())
@@ -19,7 +37,10 @@ class Response(BaseException):
         return str(self.status) + ' ' + STATUS_MESSAGES.get(self.status, '')
 
     def _wsgi_headers(self):
-        return self.headers.items()
+        headers = list(self.headers.items())
+        for cookie in self.cookies:
+            headers.append(('Set-Cookie', cookie))
+        return headers
 
     def _wsgi_body(self):
         if type(self.body) is not bytes:
