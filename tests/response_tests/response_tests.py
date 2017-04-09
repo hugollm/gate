@@ -1,4 +1,5 @@
 from datetime import datetime
+from http.cookies import CookieError
 from tempfile import NamedTemporaryFile
 from types import GeneratorType
 
@@ -99,3 +100,14 @@ class ResponseTestCase(TestCase):
         response.set_cookie('token', 'abc', expires=datetime(2017, 4, 9, 10, 35, 54), domain='my.domain.com', path='/foo', secure=True)
         expected_cookie = 'token=abc; Expires=Sun, 09 Apr 2017 10:35:54 GMT; Domain=my.domain.com; Path=/foo; Secure; HttpOnly; SameSite=Strict'
         self.assertIn(('Set-Cookie', expected_cookie), response._wsgi_headers())
+
+    def test_special_characters_in_cookie_value_get_escaped(self):
+        response = Response()
+        response.set_cookie('token', 'abc/;,~áç[\'!""]')
+        expected_cookie = 'token="abc/\\073\\054~\\341\\347[\'!\\"\\"]"; HttpOnly; SameSite=Strict'
+        self.assertIn(('Set-Cookie', expected_cookie), response._wsgi_headers())
+
+    def test_illegal_character_in_cookie_key_triggers_exception(self):
+        response = Response()
+        with self.assertRaises(CookieError):
+            response.set_cookie('token;', 'abc')

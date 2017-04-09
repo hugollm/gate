@@ -97,6 +97,12 @@ class RequestTestCase(TestCase):
         request = Request(env)
         self.assertEqual(request.cookies, {})
 
+    def test_cookie_with_special_characters(self):
+        env = mock_env()
+        env['HTTP_COOKIE'] = 'token="abc/\\073\\054~\\341\\347[\'!\\"\\"]"'
+        request = Request(env)
+        self.assertEqual(request.cookies, {'token': 'abc/;,~áç[\'!""]'})
+
     def test_ip(self):
         env = mock_env()
         env['REMOTE_ADDR'] = '127.0.0.1'
