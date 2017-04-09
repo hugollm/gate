@@ -11,3 +11,4 @@ from .endpoint_tests.json_endpoint_tests import JsonEndpointTestCase
 from .endpoint_tests.html_endpoint_tests import HtmlEndpointTestCase
 
 from .app_tests import AppTestCase
+from .test_client_tests import TestClientTestCase
