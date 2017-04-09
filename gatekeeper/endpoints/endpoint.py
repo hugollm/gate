@@ -4,15 +4,15 @@ from ..responses.response import Response
 
 class Endpoint(object):
 
-    endpoint_path = None
+    path = None
 
     def __init__(self):
         self._compiled_path_pattern = None
-        if self.endpoint_path and ':' in self.endpoint_path:
+        if self.path and ':' in self.path:
             self._compiled_path_pattern = re.compile(self._path_pattern())
 
     def _path_pattern(self):
-        pattern = re.sub(r'\/:([^\/]+)', r'/(?P<\1>[^\/]+)', self.endpoint_path)
+        pattern = re.sub(r'\/:([^\/]+)', r'/(?P<\1>[^\/]+)', self.path)
         return '^' + pattern + '$'
 
     def match_request(self, request):
@@ -21,7 +21,7 @@ class Endpoint(object):
     def _url_match(self, request):
         if self._compiled_path_pattern:
             return self._compiled_path_pattern.match(request.path)
-        return request.path == self.endpoint_path
+        return request.path == self.path
 
     def _method_match(self, request):
         return hasattr(self, request.method.lower())

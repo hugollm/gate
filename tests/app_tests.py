@@ -17,7 +17,7 @@ class AppTestCase(TestCase):
 
     def test_app_routes_request_to_endpoint_if_it_matches(self):
         class Hello(Endpoint):
-            endpoint_path = '/hello'
+            path = '/hello'
             def get(self, request, response):
                 response.body = b'hello world'
         app = App()
@@ -30,7 +30,7 @@ class AppTestCase(TestCase):
 
     def test_app_does_not_route_request_to_endpoint_if_it_does_not_match(self):
         class Hello(Endpoint):
-            endpoint_path = '/hello'
+            path = '/hello'
             def get(self, request, response):
                 response.body = b'hello world'
         app = App()
