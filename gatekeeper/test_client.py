@@ -53,13 +53,20 @@ class TestClient(object):
             env['wsgi.input'].write(json.dumps(json_data).encode('utf-8'))
             env['wsgi.input'].seek(0)
         if self.cookies:
-            env['HTTP_COOKIE'] = ''
-            for cookie in self.cookies:
-                cookie = cookie.split(';')[0]
-                morsel = list(SimpleCookie(cookie).values())[0]
-                env['HTTP_COOKIE'] += morsel.key + '=' + morsel.value + '; '
-            env['HTTP_COOKIE'] = env['HTTP_COOKIE'][:-2]
+            env['HTTP_COOKIE'] = self._assemble_cookie_string()
         return Request(env)
+
+    def _assemble_cookie_string(self):
+        simple_cookie = SimpleCookie()
+        for cookie in self.cookies:
+            simple_cookie.load(cookie)
+        cookie_dict = {key: simple_cookie[key].value for key in simple_cookie}
+        cookie_dict.pop('SameSite', None) # sazonal bug with SameSite
+        cookie_string = ''
+        for morsel in SimpleCookie(cookie_dict).values():
+            cookie_string += morsel.OutputString() + '; '
+        cookie_string = cookie_string[:-2]
+        return cookie_string
 
 
 sample_env = {

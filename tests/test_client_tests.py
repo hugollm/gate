@@ -114,3 +114,28 @@ class TestClientTestCase(TestCase):
         self.client.post('/login')
         response = self.client.get('/login')
         self.assertEqual(response.body, 'abc')
+
+    def test_client_can_handle_cookies_with_special_characters(self):
+        class Login(HtmlEndpoint):
+            endpoint_path = '/login'
+            def get(self, request, response):
+                response.body = request.cookies.get('token')
+            def post(self, request, response):
+                response.set_cookie('token', 'abc/;,~áç[\'!""]')
+        self.app.endpoint(Login)
+        self.client.post('/login')
+        response = self.client.get('/login')
+        self.assertEqual(response.body, 'abc/;,~áç[\'!""]')
+
+    def test_client_can_handle_two_cookies_at_once_and_one_with_special_characters(self):
+        class Login(HtmlEndpoint):
+            endpoint_path = '/login'
+            def get(self, request, response):
+                response.body = request.cookies.get('token1') + '|' + request.cookies.get('token2')
+            def post(self, request, response):
+                response.set_cookie('token1', 'abc')
+                response.set_cookie('token2', 'abc/;,~áç[\'!""]')
+        self.app.endpoint(Login)
+        self.client.post('/login')
+        response = self.client.get('/login')
+        self.assertEqual(response.body, 'abc|abc/;,~áç[\'!""]')

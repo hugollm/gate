@@ -65,6 +65,15 @@ class ResponseTestCase(TestCase):
         expected_cookie = 'token=abc; HttpOnly; SameSite=Strict'
         self.assertIn(('Set-Cookie', expected_cookie), response._wsgi_headers())
 
+    def test_set_two_cookies(self):
+        response = Response()
+        response.set_cookie('token1', 'abc')
+        response.set_cookie('token2', 'xyz')
+        expected_cookie1 = 'token1=abc; HttpOnly; SameSite=Strict'
+        expected_cookie2 = 'token2=xyz; HttpOnly; SameSite=Strict'
+        self.assertIn(('Set-Cookie', expected_cookie1), response._wsgi_headers())
+        self.assertIn(('Set-Cookie', expected_cookie2), response._wsgi_headers())
+
     def test_set_cookie_with_expires_date(self):
         response = Response()
         response.set_cookie('token', 'abc', expires=datetime(2017, 4, 9, 10, 35, 54))
