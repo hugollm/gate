@@ -1,6 +1,7 @@
 import copy
 import json
 import urllib
+from http.cookies import SimpleCookie
 from io import BytesIO
 
 from .requests.request import Request
@@ -10,6 +11,7 @@ class TestClient(object):
 
     def __init__(self, app):
         self.app = app
+        self.cookies = []
 
     def get(self, path, query=None, form=None, json=None):
         return self.request('GET', path, query, form, json)
@@ -34,7 +36,9 @@ class TestClient(object):
 
     def request(self, method, path, query=None, form=None, json=None):
         request = self._make_request(method, path, query, form, json)
-        return self.app.handle_request(request)
+        response = self.app.handle_request(request)
+        self.cookies.extend(response.cookies)
+        return response
 
     def _make_request(self, method, path, query, form, json_data):
         env = copy.deepcopy(sample_env)
@@ -48,6 +52,13 @@ class TestClient(object):
         if json_data:
             env['wsgi.input'].write(json.dumps(json_data).encode('utf-8'))
             env['wsgi.input'].seek(0)
+        if self.cookies:
+            env['HTTP_COOKIE'] = ''
+            for cookie in self.cookies:
+                cookie = cookie.split(';')[0]
+                morsel = list(SimpleCookie(cookie).values())[0]
+                env['HTTP_COOKIE'] += morsel.key + '=' + morsel.value + '; '
+            env['HTTP_COOKIE'] = env['HTTP_COOKIE'][:-2]
         return Request(env)
 
 

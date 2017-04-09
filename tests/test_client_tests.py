@@ -102,3 +102,15 @@ class TestClientTestCase(TestCase):
         self.app.endpoint(HelloWorld)
         response = self.client.post('/hello', json={'name': 'jane'})
         self.assertEqual(response.body, '{"name": "jane"}')
+
+    def test_client_keeps_cookies_and_sends_them_in_subsequent_requests(self):
+        class Login(HtmlEndpoint):
+            endpoint_path = '/login'
+            def get(self, request, response):
+                response.body = request.cookies.get('token')
+            def post(self, request, response):
+                response.set_cookie('token', 'abc')
+        self.app.endpoint(Login)
+        self.client.post('/login')
+        response = self.client.get('/login')
+        self.assertEqual(response.body, 'abc')
