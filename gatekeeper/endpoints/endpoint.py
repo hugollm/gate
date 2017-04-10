@@ -29,6 +29,7 @@ class Endpoint(object):
     def handle_request(self, request):
         self._fill_request_args(request)
         response = self._make_response()
+        request.set_response(response)
         self._execute_life_cycle(request, response)
         return response
 

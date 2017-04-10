@@ -1,7 +1,8 @@
 import os
 from unittest import TestCase
 
-from gatekeeper.requests.request import Request
+from gatekeeper.requests.request import Request, ResponseNotSet
+from gatekeeper.responses.response import Response
 from .factory import mock_env
 
 
@@ -136,3 +137,28 @@ class RequestTestCase(TestCase):
         env.pop('HTTP_USER_AGENT')
         request = Request(env)
         self.assertEqual(request.user_agent, None)
+
+    def test_messages(self):
+        env = mock_env()
+        env['HTTP_COOKIE'] = 'MESSAGE:foo=bar; MESSAGE:bar=biz'
+        request = Request(env)
+        request.set_response(Response())
+        self.assertEqual(request.messages, {'foo': 'bar', 'bar': 'biz'})
+
+    def test_accessing_messages_requires_a_response_to_be_set(self):
+        env = mock_env()
+        request = Request(env)
+        with self.assertRaises(ResponseNotSet):
+            request.messages
+
+    def test_accessing_messages_unsets_message_cookies(self):
+        env = mock_env()
+        env['HTTP_COOKIE'] = 'MESSAGE:foo=bar; MESSAGE:bar=biz'
+        request = Request(env)
+        response = Response()
+        request.set_response(response)
+        request.messages
+        expected_cookie = 'MESSAGE:foo=; Expires=Thu, 01 Jan 1970 00:00:00 GMT'
+        self.assertIn(('Set-Cookie', expected_cookie), response._wsgi_headers())
+        expected_cookie = 'MESSAGE:bar=; Expires=Thu, 01 Jan 1970 00:00:00 GMT'
+        self.assertIn(('Set-Cookie', expected_cookie), response._wsgi_headers())

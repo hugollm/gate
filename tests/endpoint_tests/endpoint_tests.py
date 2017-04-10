@@ -150,3 +150,12 @@ class EndpointTestCase(TestCase):
         request = Request({'REQUEST_METHOD': 'GET', 'PATH_INFO': '/users'})
         response = endpoint.handle_request(request)
         self.assertEqual(response.body, b'hello')
+
+    def test_endpoint_sets_response_in_request(self):
+        class SetResponseEndpoint(Endpoint):
+            path = '/users'
+            def get(self, request, response):
+                assert isinstance(request.response, Response)
+        endpoint = SetResponseEndpoint()
+        request = Request({'REQUEST_METHOD': 'GET', 'PATH_INFO': '/users'})
+        endpoint.handle_request(request)

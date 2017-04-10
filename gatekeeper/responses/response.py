@@ -57,6 +57,12 @@ class Response(BaseException):
             cookie += '; Path=' + path
         self.cookies.append(cookie)
 
+    def set_message(self, key, value):
+        self.set_cookie('MESSAGE:' + key, value, http_only=False, same_site=False)
+
+    def unset_message(self, key):
+        self.unset_cookie('MESSAGE:' + key)
+
     def wsgi(self, start_respose):
         start_respose(self._wsgi_status(), self._wsgi_headers())
         if self.file:

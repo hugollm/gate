@@ -6,10 +6,15 @@ class Request(object):
 
     def __init__(self, env):
         self.env = env
+        self.response = None
         self._body = None
         self._query = None
         self._headers = None
         self._cookies = None
+        self._messages = None
+
+    def set_response(self, response):
+        self.response = response
 
     @property
     def method(self):
@@ -71,6 +76,19 @@ class Request(object):
         return self._cookies
 
     @property
+    def messages(self):
+        if self.response is None:
+            raise ResponseNotSet('Accessing messages requires a response to be set')
+        if self._messages is None:
+            self._messages = {}
+            for key in self.cookies:
+                if key.startswith('MESSAGE:'):
+                    message_key = key[8:]
+                    self._messages[message_key] = self.cookies[key]
+                    self.response.unset_message(message_key)
+        return self._messages
+
+    @property
     def body(self):
         if self._body is None:
             self._body = self.env['wsgi.input'].read()
@@ -90,3 +108,7 @@ class Request(object):
     @property
     def user_agent(self):
         return self.env.get('HTTP_USER_AGENT')
+
+
+class ResponseNotSet(Exception):
+    pass
