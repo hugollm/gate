@@ -151,3 +151,15 @@ class ResponseTestCase(TestCase):
         response = Response()
         with self.assertRaises(CookieError):
             response.set_cookie('token;', 'abc')
+
+    def test_unset_cookie(self):
+        response = Response()
+        response.unset_cookie('token')
+        expected_cookie = 'token=; Expires=Thu, 01 Jan 1970 00:00:00 GMT'
+        self.assertIn(('Set-Cookie', expected_cookie), response._wsgi_headers())
+
+    def test_unset_cookie_with_domain_and_path(self):
+        response = Response()
+        response.unset_cookie('token', domain='my.domain.com', path='/foo')
+        expected_cookie = 'token=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Domain=my.domain.com; Path=/foo'
+        self.assertIn(('Set-Cookie', expected_cookie), response._wsgi_headers())

@@ -1,3 +1,4 @@
+from datetime import datetime
 from http.client import responses as STATUS_MESSAGES
 from http.cookies import SimpleCookie
 
@@ -46,6 +47,14 @@ class Response(BaseException):
             cookie += '; HttpOnly'
         if same_site:
             cookie += '; SameSite=Strict'
+        self.cookies.append(cookie)
+
+    def unset_cookie(self, key, domain=None, path=None):
+        cookie = key + '=; Expires=' + datetime(1970, 1, 1).strftime('%a, %d %b %Y %T') + ' GMT'
+        if domain:
+            cookie += '; Domain=' + domain
+        if path:
+            cookie += '; Path=' + path
         self.cookies.append(cookie)
 
     def wsgi(self, start_respose):
