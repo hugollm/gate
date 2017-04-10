@@ -17,6 +17,37 @@ class ResponseTestCase(TestCase):
         self.assertEqual(response.headers['Content-Type'], 'text/plain; charset=utf-8')
         self.assertEqual(response.body, b'')
 
+    def test_redirect(self):
+        response = Response()
+        r = response.redirect('/login')
+        self.assertEqual(r, response)
+        self.assertEqual(response.status, 303)
+        self.assertEqual(response.headers.get('Location'), '/login')
+
+    def test_not_found(self):
+        response = Response()
+        r = response.not_found()
+        self.assertEqual(r, response)
+        self.assertEqual(response.status, 404)
+
+    def test_bad_request(self):
+        response = Response()
+        r = response.bad_request()
+        self.assertEqual(r, response)
+        self.assertEqual(response.status, 400)
+
+    def test_unauthorized(self):
+        response = Response()
+        r = response.unauthorized()
+        self.assertEqual(r, response)
+        self.assertEqual(response.status, 401)
+
+    def test_forbidden(self):
+        response = Response()
+        r = response.forbidden()
+        self.assertEqual(r, response)
+        self.assertEqual(response.status, 403)
+
     def test_wsgi(self):
         response = Response()
         response.status = 400

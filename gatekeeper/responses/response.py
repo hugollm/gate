@@ -11,6 +11,27 @@ class Response(BaseException):
         self.body = b''
         self.file = None
 
+    def redirect(self, uri):
+        self.status = 303
+        self.headers['Location'] = uri
+        return self
+
+    def not_found(self):
+        self.status = 404
+        return self
+
+    def bad_request(self):
+        self.status = 400
+        return self
+
+    def unauthorized(self):
+        self.status = 401
+        return self
+
+    def forbidden(self):
+        self.status = 403
+        return self
+
     def set_cookie(self, key, value, expires=None, domain=None, path=None, secure=False, http_only=True, same_site=True):
         cookie = SimpleCookie({key: value}).get(key).OutputString()
         if expires:
