@@ -1,4 +1,6 @@
 from datetime import datetime
+import mimetypes
+import os
 from http.client import responses as STATUS_MESSAGES
 from http.cookies import SimpleCookie
 
@@ -10,7 +12,7 @@ class Response(BaseException):
         self.headers = {'Content-Type': 'text/plain; charset=utf-8'}
         self.cookies = []
         self.body = b''
-        self.file = None
+        self._file = None
 
     def redirect(self, uri):
         self.status = 303
@@ -32,6 +34,15 @@ class Response(BaseException):
     def forbidden(self):
         self.status = 403
         return self
+
+    def file(self, path, type=None, download=False, name=None):
+        self._file = path
+        if type is None:
+            type, _ = mimetypes.guess_type(path)
+        self.headers['Content-Type'] = type or 'application/octet-stream'
+        self.headers['Content-Disposition'] = 'attachment' if download else 'inline'
+        self.headers['Content-Disposition'] += '; filename="{}"'.format(name or os.path.basename(path))
+        self.headers['Content-Length'] = str(os.stat(path).st_size)
 
     def set_cookie(self, key, value, expires=None, domain=None, path=None, secure=False, http_only=True, same_site=True):
         cookie = SimpleCookie({key: value}).get(key).OutputString()
@@ -65,7 +76,7 @@ class Response(BaseException):
 
     def wsgi(self, start_respose):
         start_respose(self._wsgi_status(), self._wsgi_headers())
-        if self.file:
+        if self._file:
             return self._wsgi_file()
         return self._wsgi_body()
 
@@ -84,7 +95,7 @@ class Response(BaseException):
         return (self.body,)
 
     def _wsgi_file(self):
-        with open(self.file, 'rb') as f:
+        with open(self._file, 'rb') as f:
             mbyte = 1024 ** 2
             while True:
                 chunk = f.read(mbyte)

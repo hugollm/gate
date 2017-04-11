@@ -1,3 +1,4 @@
+import os.path
 from datetime import datetime
 from http.cookies import CookieError
 from tempfile import NamedTemporaryFile
@@ -68,7 +69,7 @@ class ResponseTestCase(TestCase):
         with NamedTemporaryFile() as tmpfile:
             tmpfile.write(b'hello world')
             tmpfile.seek(0)
-            response.file = tmpfile.name
+            response.file(tmpfile.name)
             start_respose = Mock()
             self.assertIsInstance(response.wsgi(start_respose), GeneratorType)
 
@@ -77,13 +78,70 @@ class ResponseTestCase(TestCase):
         with NamedTemporaryFile() as tmpfile:
             tmpfile.write(b'hello world')
             tmpfile.seek(0)
-            response.file = tmpfile.name
+            response.file(tmpfile.name)
             start_respose = Mock()
             file_generator = response.wsgi(start_respose)
             contents = b''
             for chunk in file_generator:
                 contents += chunk
             self.assertEqual(contents, b'hello world')
+
+    def test_setting_file_with_specified_mime_type(self):
+        response = Response()
+        with NamedTemporaryFile() as tmpfile:
+            response.file(tmpfile.name, type='image/png')
+            self.assertEqual(response.headers['Content-Type'], 'image/png')
+
+    def test_setting_file_without_specified_mime_type_makes_it_guess(self):
+        response = Response()
+        with NamedTemporaryFile(suffix='.png') as tmpfile:
+            response.file(tmpfile.name)
+            self.assertEqual(response.headers['Content-Type'], 'image/png')
+
+    def test_setting_file_without_extension_changes_content_type_to_octet_stream(self):
+        response = Response()
+        with NamedTemporaryFile() as tmpfile:
+            response.file(tmpfile.name)
+            self.assertEqual(response.headers['Content-Type'], 'application/octet-stream')
+
+    def test_setting_file_for_download(self):
+        response = Response()
+        with NamedTemporaryFile() as tmpfile:
+            response.file(tmpfile.name, download=True)
+            filename = os.path.basename(tmpfile.name)
+            self.assertEqual(response.headers['Content-Disposition'], 'attachment; filename="{}"'.format(filename))
+
+    def test_setting_file_with_name(self):
+        response = Response()
+        with NamedTemporaryFile() as tmpfile:
+            response.file(tmpfile.name, name='image.png')
+            self.assertEqual(response.headers['Content-Disposition'], 'inline; filename="image.png"')
+
+    def test_setting_file_without_name_puts_the_path_filename_in_the_header(self):
+        response = Response()
+        with NamedTemporaryFile(suffix='.png') as tmpfile:
+            response.file(tmpfile.name)
+            filename = os.path.basename(tmpfile.name)
+            self.assertEqual(response.headers['Content-Disposition'], 'inline; filename="{}"'.format(filename))
+
+    def test_setting_file_for_download_with_name(self):
+        response = Response()
+        with NamedTemporaryFile() as tmpfile:
+            response.file(tmpfile.name, download=True, name='image.png')
+            self.assertEqual(response.headers['Content-Disposition'], 'attachment; filename="image.png"')
+
+    def test_setting_file_for_download_includes_a_content_length_header(self):
+        response = Response()
+        with NamedTemporaryFile() as tmpfile:
+            tmpfile.write(b'foobar')
+            tmpfile.seek(0)
+            response.file(tmpfile.name, download=True, name='image.png')
+            self.assertEqual(response.headers['Content-Length'], '6')
+
+    def test_setting_inexistent_file_for_download_triggers_exception(self):
+        response = Response()
+        with self.assertRaises(FileNotFoundError):
+            response.file('foobar.file')
 
     def test_response_object_can_be_raised(self):
         response = Response()
