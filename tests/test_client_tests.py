@@ -139,3 +139,23 @@ class TestClientTestCase(TestCase):
         self.client.post('/login')
         response = self.client.get('/login')
         self.assertEqual(response.body, 'abc|abc/;,~áç[\'!""]')
+
+    def test_client_can_unset_cookie(self):
+        class Login(HtmlEndpoint):
+            path = '/login'
+            def post(self, request, response):
+                response.set_cookie('session-id', 'abc')
+        class Logout(HtmlEndpoint):
+            path = '/logout'
+            def post(self, request, response):
+                response.unset_cookie('session-id')
+        class Dashboard(HtmlEndpoint):
+            path = '/dashboard'
+            def get(self, request, response):
+                assert 'session-id' not in request.cookies
+        self.app.endpoint(Login)
+        self.app.endpoint(Logout)
+        self.app.endpoint(Dashboard)
+        self.client.post('/login')
+        self.client.post('/logout')
+        self.client.get('/dashboard')

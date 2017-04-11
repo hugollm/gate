@@ -64,7 +64,8 @@ class TestClient(object):
         cookie_dict.pop('SameSite', None) # sazonal bug with SameSite
         cookie_string = ''
         for morsel in SimpleCookie(cookie_dict).values():
-            cookie_string += morsel.OutputString() + '; '
+            if morsel.value != '':
+                cookie_string += morsel.OutputString() + '; '
         cookie_string = cookie_string[:-2]
         return cookie_string
 
