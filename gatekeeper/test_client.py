@@ -61,7 +61,6 @@ class TestClient(object):
         for cookie in self.cookies:
             simple_cookie.load(cookie)
         cookie_dict = {key: simple_cookie[key].value for key in simple_cookie}
-        cookie_dict.pop('SameSite', None) # sazonal bug with SameSite
         cookie_string = ''
         for morsel in SimpleCookie(cookie_dict).values():
             if morsel.value != '':
