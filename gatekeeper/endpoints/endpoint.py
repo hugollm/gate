@@ -5,6 +5,7 @@ from ..responses.response import Response
 class Endpoint(object):
 
     path = None
+    _allowed_methods = ('GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS')
 
     def __init__(self):
         self._compiled_regex = None
@@ -41,7 +42,9 @@ class Endpoint(object):
         return request.path == self.path
 
     def _method_match(self, request):
-        return hasattr(self, request.method.lower())
+        is_allowed = request.method in self._allowed_methods
+        has_method = hasattr(self, request.method.lower())
+        return is_allowed and has_method
 
     def handle_request(self, request):
         self._fill_request_args(request)
@@ -64,7 +67,8 @@ class Endpoint(object):
         try:
             if hasattr(self, 'before_request'):
                 self.before_request(request, response)
-            method(request, response)
+            if request.method in self._allowed_methods:
+                method(request, response)
         except Response:
             pass
         except Exception as e:

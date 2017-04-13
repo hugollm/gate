@@ -246,3 +246,23 @@ class EndpointTestCase(TestCase):
         with self.assertRaises(CustomException) as context:
             endpoint.handle_request(request)
         endpoint.on_exception.assert_called_once_with(request, context.exception)
+
+    def test_endpoint_accepted_methods(self):
+        endpoint = Endpoint()
+        endpoint.path = '/'
+        allowed_methods = ('get', 'post', 'put', 'patch', 'delete', 'head', 'options')
+        for method in allowed_methods:
+            setattr(endpoint, method, Mock())
+            request = Request({'REQUEST_METHOD': method.upper(), 'PATH_INFO': '/'})
+            self.assertTrue(endpoint.match_request(request))
+            endpoint.handle_request(request)
+            self.assertEqual(getattr(endpoint, method).call_count, 1)
+
+    def test_endpoint_rejects_invalid_method(self):
+        endpoint = Endpoint()
+        endpoint.path = '/'
+        endpoint.foobar = Mock()
+        request = Request({'REQUEST_METHOD': 'FOOBAR', 'PATH_INFO': '/'})
+        response = endpoint.handle_request(request)
+        self.assertFalse(endpoint.match_request(request))
+        self.assertEqual(endpoint.foobar.call_count, 0)
