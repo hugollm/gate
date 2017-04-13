@@ -59,7 +59,7 @@ class EndpointTestCase(TestCase):
         response = endpoint.handle_request(request)
         self.assertEqual(response.body, b'hello world')
 
-    def test_endpoint_calls_before_request_method_if_defined(self):
+    def test_endpoint_calls_after_request_method_if_defined(self):
         endpoint = Endpoint()
         endpoint.path = '/'
         def get(self, request, response):
