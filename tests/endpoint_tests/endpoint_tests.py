@@ -200,3 +200,49 @@ class EndpointTestCase(TestCase):
         endpoint = SetResponseEndpoint()
         request = Request({'REQUEST_METHOD': 'GET', 'PATH_INFO': '/users'})
         endpoint.handle_request(request)
+
+    def test_on_exception_method_gets_called_if_an_unexpected_exception_raises(self):
+        class CustomException(Exception):
+            pass
+        class RaiseEndpoint(Endpoint):
+            path = '/users'
+            def get(self, request, response):
+                raise CustomException()
+        endpoint = RaiseEndpoint()
+        endpoint.on_exception = Mock()
+        request = Request({'REQUEST_METHOD': 'GET', 'PATH_INFO': '/users'})
+        with self.assertRaises(CustomException) as context:
+            endpoint.handle_request(request)
+        endpoint.on_exception.assert_called_once_with(request, context.exception)
+
+    def test_on_exception_method_gets_called_exception_raises_in_before_request(self):
+        class CustomException(Exception):
+            pass
+        class RaiseEndpoint(Endpoint):
+            path = '/users'
+            def before_request(self, request, response):
+                raise CustomException()
+            def get(self, request, response):
+                pass
+        endpoint = RaiseEndpoint()
+        endpoint.on_exception = Mock()
+        request = Request({'REQUEST_METHOD': 'GET', 'PATH_INFO': '/users'})
+        with self.assertRaises(CustomException) as context:
+            endpoint.handle_request(request)
+        endpoint.on_exception.assert_called_once_with(request, context.exception)
+
+    def test_on_exception_method_gets_called_exception_raises_in_after_request(self):
+        class CustomException(Exception):
+            pass
+        class RaiseEndpoint(Endpoint):
+            path = '/users'
+            def get(self, request, response):
+                pass
+            def after_request(self, request, response):
+                raise CustomException()
+        endpoint = RaiseEndpoint()
+        endpoint.on_exception = Mock()
+        request = Request({'REQUEST_METHOD': 'GET', 'PATH_INFO': '/users'})
+        with self.assertRaises(CustomException) as context:
+            endpoint.handle_request(request)
+        endpoint.on_exception.assert_called_once_with(request, context.exception)

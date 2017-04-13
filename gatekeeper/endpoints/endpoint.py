@@ -67,8 +67,16 @@ class Endpoint(object):
             method(request, response)
         except Response:
             pass
+        except Exception as e:
+            if hasattr(self, 'on_exception'):
+                self.on_exception(request, e)
+            raise
         try:
             if hasattr(self, 'after_request'):
                 self.after_request(request, response)
         except Response:
             pass
+        except Exception as e:
+            if hasattr(self, 'on_exception'):
+                self.on_exception(request, e)
+            raise
