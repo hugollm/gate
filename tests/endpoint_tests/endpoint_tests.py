@@ -166,7 +166,7 @@ class EndpointTestCase(TestCase):
         response = endpoint.handle_request(request)
         self.assertEqual(response.body, b'hello')
 
-    def test_raising_response_on_main_method_jumps_after_request(self):
+    def test_raising_response_on_main_method_does_not_jump_after_request(self):
         class RaiseEndpoint(Endpoint):
             path = '/users'
             def get(self, request, response):
@@ -177,7 +177,20 @@ class EndpointTestCase(TestCase):
         endpoint = RaiseEndpoint()
         request = Request({'REQUEST_METHOD': 'GET', 'PATH_INFO': '/users'})
         response = endpoint.handle_request(request)
-        self.assertEqual(response.body, b'hello')
+        self.assertEqual(response.body, b'hello world')
+
+    def test_after_request_method_can_raise_response(self):
+        class RaiseEndpoint(Endpoint):
+            path = '/users'
+            def get(self, request, response):
+                response.body = b'hello'
+            def after_request(self, request, response):
+                response.body += b' world'
+                raise response
+        endpoint = RaiseEndpoint()
+        request = Request({'REQUEST_METHOD': 'GET', 'PATH_INFO': '/users'})
+        response = endpoint.handle_request(request)
+        self.assertEqual(response.body, b'hello world')
 
     def test_endpoint_sets_response_in_request(self):
         class SetResponseEndpoint(Endpoint):

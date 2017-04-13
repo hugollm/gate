@@ -65,6 +65,9 @@ class Endpoint(object):
             if hasattr(self, 'before_request'):
                 self.before_request(request, response)
             method(request, response)
+        except Response:
+            pass
+        try:
             if hasattr(self, 'after_request'):
                 self.after_request(request, response)
         except Response:
