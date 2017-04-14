@@ -11,8 +11,18 @@ class Response(BaseException):
         self.status = 200
         self.headers = {'Content-Type': 'text/plain; charset=utf-8'}
         self.cookies = []
-        self.body = b''
+        self._body = b''
         self._file = None
+
+    @property
+    def body(self):
+        return self._body
+
+    @body.setter
+    def body(self, value):
+        if type(value) is not bytes:
+            value = value.encode('utf-8')
+        self._body = value
 
     def redirect(self, uri):
         self.status = 303
@@ -88,18 +98,12 @@ class Response(BaseException):
         for cookie in self.cookies:
             headers.append(('Set-Cookie', cookie))
         if 'Content-Length' not in self.headers:
-            self._convert_body_to_bytes()
             length = str(len(self.body))
             headers.append(('Content-Length', length))
         return headers
 
     def _wsgi_body(self):
-        self._convert_body_to_bytes()
         return (self.body,)
-
-    def _convert_body_to_bytes(self):
-        if type(self.body) is not bytes:
-            self.body = self.body.encode('utf-8')
 
     def _wsgi_file(self):
         with open(self._file, 'rb') as f:

@@ -32,6 +32,17 @@ class ResponseTestCase(TestCase):
         self.assertEqual(response.headers['Content-Type'], 'text/plain; charset=utf-8')
         self.assertEqual(response.body, b'')
 
+    def test_string_gets_converted_to_bytes_when_set_to_body(self):
+        response = Response()
+        response.body = 'hello world'
+        self.assertEqual(response.body, b'hello world')
+
+    def test_can_concatenate_bytes_to_previously_set_body_string(self):
+        response = Response()
+        response.body = 'hello'
+        response.body += b' world'
+        self.assertEqual(response.body, b'hello world')
+
     def test_redirect(self):
         response = Response()
         r = response.redirect('/login')

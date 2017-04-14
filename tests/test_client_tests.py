@@ -84,7 +84,7 @@ class TestClientTestCase(TestCase):
                 response.body = 'page: ' + request.query['page']
         self.app.endpoint(HelloWorld)
         response = self.client.get('/hello', query={'page': 1})
-        self.assertEqual(response.body, 'page: 1')
+        self.assertEqual(response.body, b'page: 1')
 
     def test_form_argument(self):
         class HelloWorld(HtmlEndpoint):
@@ -93,7 +93,7 @@ class TestClientTestCase(TestCase):
                 response.body = 'name: ' + request.form['name']
         self.app.endpoint(HelloWorld)
         response = self.client.post('/hello', form={'name': 'john'})
-        self.assertEqual(response.body, 'name: john')
+        self.assertEqual(response.body, b'name: john')
 
     def test_form_argument_with_list_as_value(self):
         class HelloWorld(HtmlEndpoint):
@@ -103,7 +103,7 @@ class TestClientTestCase(TestCase):
                 response.body = 'name: ' + ', '.join(request.form['names'])
         self.app.endpoint(HelloWorld)
         response = self.client.post('/hello', form={'names': ['john', 'jane']})
-        self.assertEqual(response.body, 'name: john, jane')
+        self.assertEqual(response.body, b'name: john, jane')
 
     def test_form_argument_with_list_of_numbers(self):
         class HelloWorld(HtmlEndpoint):
@@ -113,7 +113,7 @@ class TestClientTestCase(TestCase):
                 response.body = 'ids: ' + ', '.join(request.form['user_ids'])
         self.app.endpoint(HelloWorld)
         response = self.client.post('/hello', form={'user_ids': [1, 2, 3]})
-        self.assertEqual(response.body, 'ids: 1, 2, 3')
+        self.assertEqual(response.body, b'ids: 1, 2, 3')
 
     def test_json_argument(self):
         class HelloWorld(JsonEndpoint):
@@ -122,7 +122,7 @@ class TestClientTestCase(TestCase):
                 response.json = request.json
         self.app.endpoint(HelloWorld)
         response = self.client.post('/hello', json={'name': 'jane'})
-        self.assertEqual(response.body, '{"name": "jane"}')
+        self.assertEqual(response.body, b'{"name": "jane"}')
 
     def test_client_keeps_cookies_and_sends_them_in_subsequent_requests(self):
         class Login(HtmlEndpoint):
@@ -134,7 +134,7 @@ class TestClientTestCase(TestCase):
         self.app.endpoint(Login)
         self.client.post('/login')
         response = self.client.get('/login')
-        self.assertEqual(response.body, 'abc')
+        self.assertEqual(response.body, b'abc')
 
     def test_client_can_handle_cookies_with_special_characters(self):
         class Login(HtmlEndpoint):
@@ -146,7 +146,7 @@ class TestClientTestCase(TestCase):
         self.app.endpoint(Login)
         self.client.post('/login')
         response = self.client.get('/login')
-        self.assertEqual(response.body, 'abc/;,~áç[\'!""]')
+        self.assertEqual(response.body, 'abc/;,~áç[\'!""]'.encode('utf-8'))
 
     def test_client_can_handle_two_cookies_at_once_and_one_with_special_characters(self):
         class Login(HtmlEndpoint):
@@ -159,7 +159,7 @@ class TestClientTestCase(TestCase):
         self.app.endpoint(Login)
         self.client.post('/login')
         response = self.client.get('/login')
-        self.assertEqual(response.body, 'abc|abc/;,~áç[\'!""]')
+        self.assertEqual(response.body, 'abc|abc/;,~áç[\'!""]'.encode('utf-8'))
 
     def test_client_can_unset_cookie(self):
         class Login(HtmlEndpoint):

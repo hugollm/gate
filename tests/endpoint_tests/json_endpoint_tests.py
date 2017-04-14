@@ -32,11 +32,11 @@ class JsonEndpointTestCase(TestCase):
         endpoint = JsonTestEndpoint()
         request = Request({'REQUEST_METHOD': 'GET', 'PATH_INFO': '/'})
         response = endpoint.handle_request(request)
-        self.assertEqual(response.body, '{"ok": true}')
+        self.assertEqual(response.body, b'{"ok": true}')
 
     def test_default_json_response_is_empty_object(self):
         endpoint = JsonEndpoint()
         endpoint.get = Mock()
         request = Request({'REQUEST_METHOD': 'GET', 'PATH_INFO': '/'})
         response = endpoint.handle_request(request)
-        self.assertEqual(response.body, '{}')
+        self.assertEqual(response.body, b'{}')
