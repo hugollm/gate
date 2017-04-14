@@ -43,6 +43,11 @@ class ResponseTestCase(TestCase):
         response.body += b' world'
         self.assertEqual(response.body, b'hello world')
 
+    def test_setting_body_converts_any_object_into_its_string_representation(self):
+        response = Response()
+        response.body = {'foo': 'bar'}
+        self.assertEqual(response.body, b"{'foo': 'bar'}")
+
     def test_redirect(self):
         response = Response()
         r = response.redirect('/login')

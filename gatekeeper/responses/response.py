@@ -21,7 +21,7 @@ class Response(BaseException):
     @body.setter
     def body(self, value):
         if type(value) is not bytes:
-            value = value.encode('utf-8')
+            value = str(value).encode('utf-8')
         self._body = value
 
     def redirect(self, uri):
