@@ -283,3 +283,17 @@ class TestClientTestCase(TestCase):
         with NamedTemporaryFile() as tmpfile:
             response = self.client.post('/upload', files={'photo': tmpfile.name})
             self.assertEqual(response.status, 200)
+
+    def test_client_can_send_list_in_form_along_with_a_file(self):
+        class Upload(HtmlEndpoint):
+            path = '/upload'
+            def post(self, request, response):
+                assert request.form == {'ids': ['1', '2', '3']}
+                photo = request.files['photo']
+                assert photo.stream.read() == b'IMAGE CONTENT'
+        self.app.endpoint(Upload)
+        with NamedTemporaryFile() as tmpfile:
+            tmpfile.write(b'IMAGE CONTENT')
+            tmpfile.seek(0)
+            response = self.client.post('/upload', form={'ids': [1, 2, 3]}, files={'photo': tmpfile.name})
+            self.assertEqual(response.status, 200)

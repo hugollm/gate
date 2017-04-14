@@ -51,7 +51,7 @@ class TestClient(object):
         if form and not files:
             self._write_form_to_env(env, form)
         if files:
-            self._write_multipart_form_data_to_env(env, form, files)
+            self._write_multipart_form_to_env(env, form, files)
         if json_data:
             env['wsgi.input'].write(json.dumps(json_data).encode('utf-8'))
             env['wsgi.input'].seek(0)
@@ -72,14 +72,32 @@ class TestClient(object):
         env['wsgi.input'].write('&'.join(items).encode('utf-8'))
         env['wsgi.input'].seek(0)
 
-    def _write_multipart_form_data_to_env(self, env, form, files):
+    def _write_multipart_form_to_env(self, env, form, files):
         bytecount = 0
         env['CONTENT_TYPE'] = 'multipart/form-data; boundary=----WebKitFormBoundaryLn6U80VApiAoyY3B'
+        bytecount += self._write_multipart_data_to_env(env, form)
+        bytecount += self._write_multipart_files_to_env(env, files)
+        bytecount += env['wsgi.input'].write(b'------WebKitFormBoundaryLn6U80VApiAoyY3B--\n')
+        env['CONTENT_LENGTH'] = str(bytecount)
+        env['wsgi.input'].seek(0)
+
+    def _write_multipart_data_to_env(self, env, form):
+        bytecount = 0
         if form:
             for key, value in form.items():
-                bytecount += env['wsgi.input'].write(b'------WebKitFormBoundaryLn6U80VApiAoyY3B\n')
-                bytecount += env['wsgi.input'].write('Content-Disposition: form-data; name="{}"\n\n'.format(key).encode('utf-8'))
-                bytecount += env['wsgi.input'].write(str(value).encode('utf-8') + b'\n')
+                if hasattr(value, '__iter__') and not isinstance(value, str):
+                    for v in value:
+                        bytecount += env['wsgi.input'].write(b'------WebKitFormBoundaryLn6U80VApiAoyY3B\n')
+                        bytecount += env['wsgi.input'].write('Content-Disposition: form-data; name="{}"\n\n'.format(key).encode('utf-8'))
+                        bytecount += env['wsgi.input'].write(str(v).encode('utf-8') + b'\n')
+                else:
+                    bytecount += env['wsgi.input'].write(b'------WebKitFormBoundaryLn6U80VApiAoyY3B\n')
+                    bytecount += env['wsgi.input'].write('Content-Disposition: form-data; name="{}"\n\n'.format(key).encode('utf-8'))
+                    bytecount += env['wsgi.input'].write(str(value).encode('utf-8') + b'\n')
+        return bytecount
+
+    def _write_multipart_files_to_env(self, env, files):
+        bytecount = 0
         for key, filepath in files.items():
             filename = os.path.basename(filepath)
             mime_type, _ = mimetypes.guess_type(filepath)
@@ -90,9 +108,7 @@ class TestClient(object):
                 bytecount += env['wsgi.input'].write('Content-Disposition: form-data; name="{}"; filename="{}"\n'.format(key, filename).encode('utf-8'))
                 bytecount += env['wsgi.input'].write('Content-Type: {}\n\n'.format(mime_type).encode('utf-8'))
                 bytecount += env['wsgi.input'].write(f.read() + b'\n')
-        bytecount += env['wsgi.input'].write(b'------WebKitFormBoundaryLn6U80VApiAoyY3B--\n')
-        env['wsgi.input'].seek(0)
-        env['CONTENT_LENGTH'] = str(bytecount)
+        return bytecount
 
     def _assemble_cookie_string(self):
         simple_cookie = SimpleCookie()
