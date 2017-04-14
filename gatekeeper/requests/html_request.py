@@ -1,4 +1,5 @@
-import os
+from io import BytesIO
+import os.path
 import cgi
 from warnings import warn
 
@@ -38,7 +39,7 @@ class HtmlRequest(Request):
     @property
     def cgi_form(self):
         if self._cgi_form is None:
-            self._cgi_form = cgi.FieldStorage(fp=self.env['wsgi.input'], environ=self.env)
+            self._cgi_form = cgi.FieldStorage(fp=BytesIO(self.body), environ=self.env)
         return self._cgi_form
 
     def _cgi_item_is_file(self, item):

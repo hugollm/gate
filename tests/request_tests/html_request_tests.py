@@ -16,6 +16,24 @@ class HtmlRequestTestCase(TestCase):
         request = HtmlRequest(env)
         self.assertEqual(request.form, {'page': '1', 'order': 'price'})
 
+    def test_request_can_access_form_after_body(self):
+        env = mock_env()
+        env['REQUEST_METHOD'] = 'POST'
+        env['wsgi.input'].write(b'page=1&order=price')
+        env['wsgi.input'].seek(0)
+        request = HtmlRequest(env)
+        request.body
+        self.assertEqual(request.form, {'page': '1', 'order': 'price'})
+
+    def test_request_can_access_body_after_form(self):
+        env = mock_env()
+        env['REQUEST_METHOD'] = 'POST'
+        env['wsgi.input'].write(b'page=1&order=price')
+        env['wsgi.input'].seek(0)
+        request = HtmlRequest(env)
+        request.form
+        self.assertEqual(request.body, b'page=1&order=price')
+
     def test_reapeated_form_keys_should_appear_as_list(self):
         env = mock_env()
         env['REQUEST_METHOD'] = 'POST'
@@ -35,6 +53,21 @@ class HtmlRequestTestCase(TestCase):
             env['wsgi.input'].seek(0)
         request = HtmlRequest(env)
         self.assertEqual(request.form, {'name': 'john', 'age': '23'})
+        self.assertIn('photo', request.files)
+        self.assertEqual(request.files['photo'].name, 'photo.png')
+        self.assertEqual(request.files['photo'].type, 'image/png')
+
+    def test_can_access_files_after_body(self):
+        env = mock_env()
+        env['REQUEST_METHOD'] = 'POST'
+        env['CONTENT_TYPE'] = 'multipart/form-data; boundary=----WebKitFormBoundaryLn6U80VApiAoyY3B'
+        env['CONTENT_LENGTH'] = '1173'
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        with open(os.path.join(dir_path, 'multipart-form-data', 'name-age-photo'), 'rb') as f:
+            env['wsgi.input'].write(f.read())
+            env['wsgi.input'].seek(0)
+        request = HtmlRequest(env)
+        request.body
         self.assertIn('photo', request.files)
         self.assertEqual(request.files['photo'].name, 'photo.png')
         self.assertEqual(request.files['photo'].type, 'image/png')
