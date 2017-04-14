@@ -49,10 +49,9 @@ class TestClient(object):
         if query:
             env['QUERY_STRING'] = urllib.parse.urlencode(query)
         if form and not files:
-            env['wsgi.input'].write(urllib.parse.urlencode(form).encode('utf-8'))
-            env['wsgi.input'].seek(0)
-        elif files:
-            self._write_form_and_files_to_env(env, form, files)
+            self._write_form_to_env(env, form)
+        if files:
+            self._write_multipart_form_data_to_env(env, form, files)
         if json_data:
             env['wsgi.input'].write(json.dumps(json_data).encode('utf-8'))
             env['wsgi.input'].seek(0)
@@ -60,7 +59,20 @@ class TestClient(object):
             env['HTTP_COOKIE'] = self._assemble_cookie_string()
         return Request(env)
 
-    def _write_form_and_files_to_env(self, env, form, files):
+    def _write_form_to_env(self, env, form):
+        items = []
+        for key, value in form.items():
+            if hasattr(value, '__iter__') and not isinstance(value, str):
+                for v in value:
+                    item = urllib.parse.urlencode({key: v})
+                    items.append(item)
+            else:
+                item = urllib.parse.urlencode({key: value})
+                items.append(item)
+        env['wsgi.input'].write('&'.join(items).encode('utf-8'))
+        env['wsgi.input'].seek(0)
+
+    def _write_multipart_form_data_to_env(self, env, form, files):
         bytecount = 0
         env['CONTENT_TYPE'] = 'multipart/form-data; boundary=----WebKitFormBoundaryLn6U80VApiAoyY3B'
         if form:

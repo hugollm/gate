@@ -95,6 +95,26 @@ class TestClientTestCase(TestCase):
         response = self.client.post('/hello', form={'name': 'john'})
         self.assertEqual(response.body, 'name: john')
 
+    def test_form_argument_with_list_as_value(self):
+        class HelloWorld(HtmlEndpoint):
+            path = '/hello'
+            def post(self, request, response):
+                assert request.form['names'] == ['john', 'jane']
+                response.body = 'name: ' + ', '.join(request.form['names'])
+        self.app.endpoint(HelloWorld)
+        response = self.client.post('/hello', form={'names': ['john', 'jane']})
+        self.assertEqual(response.body, 'name: john, jane')
+
+    def test_form_argument_with_list_of_numbers(self):
+        class HelloWorld(HtmlEndpoint):
+            path = '/hello'
+            def post(self, request, response):
+                assert request.form['user_ids'] == ['1', '2', '3']
+                response.body = 'ids: ' + ', '.join(request.form['user_ids'])
+        self.app.endpoint(HelloWorld)
+        response = self.client.post('/hello', form={'user_ids': [1, 2, 3]})
+        self.assertEqual(response.body, 'ids: 1, 2, 3')
+
     def test_json_argument(self):
         class HelloWorld(JsonEndpoint):
             path = '/hello'
