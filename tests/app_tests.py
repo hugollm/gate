@@ -1,8 +1,9 @@
 from unittest import TestCase
 from unittest.mock import Mock
 
-from gatekeeper.app import App, DuplicateEndpoints, AmbiguousEndpoints
+from gatekeeper.app import App
 from gatekeeper.endpoints.endpoint import Endpoint
+from gatekeeper.exceptions import DuplicateEndpoints, AmbiguousEndpoints
 
 
 class AppTestCase(TestCase):

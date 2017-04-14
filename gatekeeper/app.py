@@ -1,5 +1,6 @@
 from .requests.request import Request
 from .responses.response import Response
+from .exceptions import DuplicateEndpoints, AmbiguousEndpoints
 
 
 class App(object):
@@ -42,17 +43,3 @@ class App(object):
         response = Response()
         response.status = 404
         return response
-
-
-class DuplicateEndpoints(Exception):
-
-    def __init__(self, path):
-        message = 'Cannot register two endpoints with the same path: ' + path
-        super(DuplicateEndpoints, self).__init__(message)
-
-
-class AmbiguousEndpoints(Exception):
-
-    def __init__(self, path):
-        message = 'The same path is leading to different endpoints: ' + path
-        super(AmbiguousEndpoints, self).__init__(message)

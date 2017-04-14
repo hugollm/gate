@@ -1,6 +1,8 @@
 from http.cookies import SimpleCookie
 from urllib.parse import parse_qsl
 
+from ..exceptions import ResponseNotSet
+
 
 class Request(object):
 
@@ -78,7 +80,7 @@ class Request(object):
     @property
     def messages(self):
         if self.response is None:
-            raise ResponseNotSet('Accessing messages requires a response to be set')
+            raise ResponseNotSet()
         if self._messages is None:
             self._messages = {}
             for key in self.cookies:
@@ -108,7 +110,3 @@ class Request(object):
     @property
     def user_agent(self):
         return self.env.get('HTTP_USER_AGENT')
-
-
-class ResponseNotSet(Exception):
-    pass
