@@ -1,7 +1,9 @@
 import copy
 import json
+import mimetypes
 import urllib
 from http.cookies import SimpleCookie
+import os.path
 from io import BytesIO
 
 from .requests.request import Request
@@ -14,47 +16,71 @@ class TestClient(object):
         self.cookies = []
 
     def get(self, path, query=None, form=None, json=None):
-        return self.request('GET', path, query, form, json)
+        return self.request('GET', path, query, form, None, json)
 
-    def post(self, path, query=None, form=None, json=None):
-        return self.request('POST', path, query, form, json)
+    def post(self, path, query=None, form=None, files=None, json=None):
+        return self.request('POST', path, query, form, files, json)
 
-    def put(self, path, query=None, form=None, json=None):
-        return self.request('PUT', path, query, form, json)
+    def put(self, path, query=None, form=None, files=None, json=None):
+        return self.request('PUT', path, query, form, files, json)
 
-    def patch(self, path, query=None, form=None, json=None):
-        return self.request('PATCH', path, query, form, json)
+    def patch(self, path, query=None, form=None, files=None, json=None):
+        return self.request('PATCH', path, query, form, files, json)
 
     def delete(self, path, query=None, form=None, json=None):
-        return self.request('DELETE', path, query, form, json)
+        return self.request('DELETE', path, query, form, None, json)
 
     def head(self, path, query=None, form=None, json=None):
-        return self.request('HEAD', path, query, form, json)
+        return self.request('HEAD', path, query, form, None, json)
 
     def options(self, path, query=None, form=None, json=None):
-        return self.request('OPTIONS', path, query, form, json)
+        return self.request('OPTIONS', path, query, form, None, json)
 
-    def request(self, method, path, query=None, form=None, json=None):
-        request = self._make_request(method, path, query, form, json)
+    def request(self, method, path, query=None, form=None, files=None, json=None):
+        request = self._make_request(method, path, query, form, files, json)
         response = self.app.handle_request(request)
         self.cookies.extend(response.cookies)
         return response
 
-    def _make_request(self, method, path, query, form, json_data):
+    def _make_request(self, method, path, query, form, files, json_data):
         env = copy.deepcopy(sample_env)
         env['REQUEST_METHOD'] = method.upper()
         env['PATH_INFO'] = path
         if query:
             env['QUERY_STRING'] = urllib.parse.urlencode(query)
-        if form:
+        if form and not files:
             env['wsgi.input'].write(urllib.parse.urlencode(form).encode('utf-8'))
             env['wsgi.input'].seek(0)
+        elif files:
+            self._write_form_and_files_to_env(env, form, files)
         if json_data:
             env['wsgi.input'].write(json.dumps(json_data).encode('utf-8'))
             env['wsgi.input'].seek(0)
         if self.cookies:
             env['HTTP_COOKIE'] = self._assemble_cookie_string()
         return Request(env)
+
+    def _write_form_and_files_to_env(self, env, form, files):
+        bytecount = 0
+        env['CONTENT_TYPE'] = 'multipart/form-data; boundary=----WebKitFormBoundaryLn6U80VApiAoyY3B'
+        if form:
+            for key, value in form.items():
+                bytecount += env['wsgi.input'].write(b'------WebKitFormBoundaryLn6U80VApiAoyY3B\n')
+                bytecount += env['wsgi.input'].write('Content-Disposition: form-data; name="{}"\n\n'.format(key).encode('utf-8'))
+                bytecount += env['wsgi.input'].write(str(value).encode('utf-8') + b'\n')
+        for key, filepath in files.items():
+            filename = os.path.basename(filepath)
+            mime_type, _ = mimetypes.guess_type(filepath)
+            if not mime_type:
+                mime_type = 'application/octet-stream'
+            with open(filepath, 'rb') as f:
+                bytecount += env['wsgi.input'].write(b'------WebKitFormBoundaryLn6U80VApiAoyY3B\n')
+                bytecount += env['wsgi.input'].write('Content-Disposition: form-data; name="{}"; filename="{}"\n'.format(key, filename).encode('utf-8'))
+                bytecount += env['wsgi.input'].write('Content-Type: {}\n\n'.format(mime_type).encode('utf-8'))
+                bytecount += env['wsgi.input'].write(f.read() + b'\n')
+        bytecount += env['wsgi.input'].write(b'------WebKitFormBoundaryLn6U80VApiAoyY3B--\n')
+        env['wsgi.input'].seek(0)
+        env['CONTENT_LENGTH'] = str(bytecount)
 
     def _assemble_cookie_string(self):
         simple_cookie = SimpleCookie()

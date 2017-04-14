@@ -1,3 +1,4 @@
+from tempfile import NamedTemporaryFile
 from unittest import TestCase
 
 from gatekeeper.app import App
@@ -159,3 +160,106 @@ class TestClientTestCase(TestCase):
         self.client.post('/login')
         self.client.post('/logout')
         self.client.get('/dashboard')
+
+    def test_client_can_upload_file_with_post(self):
+        class Upload(HtmlEndpoint):
+            path = '/upload'
+            def post(self, request, response):
+                photo = request.files['photo']
+                assert photo.stream.read() == b'IMAGE CONTENT'
+        self.app.endpoint(Upload)
+        with NamedTemporaryFile() as tmpfile:
+            tmpfile.write(b'IMAGE CONTENT')
+            tmpfile.seek(0)
+            response = self.client.post('/upload', files={'photo': tmpfile.name})
+            self.assertEqual(response.status, 200)
+
+    def test_client_can_upload_file_with_put(self):
+        class Upload(HtmlEndpoint):
+            path = '/upload'
+            def put(self, request, response):
+                photo = request.files['photo']
+                assert photo.stream.read() == b'IMAGE CONTENT'
+        self.app.endpoint(Upload)
+        with NamedTemporaryFile() as tmpfile:
+            tmpfile.write(b'IMAGE CONTENT')
+            tmpfile.seek(0)
+            response = self.client.put('/upload', files={'photo': tmpfile.name})
+            self.assertEqual(response.status, 200)
+
+    def test_client_can_upload_file_with_patch(self):
+        class Upload(HtmlEndpoint):
+            path = '/upload'
+            def patch(self, request, response):
+                photo = request.files['photo']
+                assert photo.stream.read() == b'IMAGE CONTENT'
+        self.app.endpoint(Upload)
+        with NamedTemporaryFile() as tmpfile:
+            tmpfile.write(b'IMAGE CONTENT')
+            tmpfile.seek(0)
+            response = self.client.patch('/upload', files={'photo': tmpfile.name})
+            self.assertEqual(response.status, 200)
+
+    def test_client_can_upload_two_files(self):
+        class Upload(HtmlEndpoint):
+            path = '/upload'
+            def post(self, request, response):
+                photo1 = request.files['photo1']
+                photo2 = request.files['photo2']
+                assert photo1.stream.read() == b'IMAGE CONTENT 1'
+                assert photo2.stream.read() == b'IMAGE CONTENT 2'
+        self.app.endpoint(Upload)
+        with NamedTemporaryFile() as tmpfile1:
+            with NamedTemporaryFile() as tmpfile2:
+                tmpfile1.write(b'IMAGE CONTENT 1')
+                tmpfile2.write(b'IMAGE CONTENT 2')
+                tmpfile1.seek(0)
+                tmpfile2.seek(0)
+                response = self.client.post('/upload', files={'photo1': tmpfile1.name, 'photo2': tmpfile2.name})
+                self.assertEqual(response.status, 200)
+
+    def test_client_can_upload_two_files_along_with_form_content(self):
+        class Upload(HtmlEndpoint):
+            path = '/upload'
+            def post(self, request, response):
+                assert request.form == {'name': 'john', 'age': '23'}
+                photo1 = request.files['photo1']
+                photo2 = request.files['photo2']
+                assert photo1.stream.read() == b'IMAGE CONTENT 1'
+                assert photo2.stream.read() == b'IMAGE CONTENT 2'
+        self.app.endpoint(Upload)
+        with NamedTemporaryFile() as tmpfile1:
+            with NamedTemporaryFile() as tmpfile2:
+                tmpfile1.write(b'IMAGE CONTENT 1')
+                tmpfile2.write(b'IMAGE CONTENT 2')
+                tmpfile1.seek(0)
+                tmpfile2.seek(0)
+                form = {'name': 'john', 'age': 23}
+                response = self.client.post('/upload', form=form, files={
+                    'photo1': tmpfile1.name,
+                    'photo2': tmpfile2.name,
+                })
+                self.assertEqual(response.status, 200)
+
+    def test_uploaded_file_with_client_gets_name_and_type_right(self):
+        class Upload(HtmlEndpoint):
+            path = '/upload'
+            def post(self, request, response):
+                photo = request.files['photo']
+                assert photo.name.endswith('.png')
+                assert photo.type == 'image/png'
+        self.app.endpoint(Upload)
+        with NamedTemporaryFile(suffix='.png') as tmpfile:
+            response = self.client.post('/upload', files={'photo': tmpfile.name})
+            self.assertEqual(response.status, 200)
+
+    def test_client_sets_uploaded_file_mime_type_as_octet_stream_if_it_cant_guess_it(self):
+        class Upload(HtmlEndpoint):
+            path = '/upload'
+            def post(self, request, response):
+                photo = request.files['photo']
+                assert photo.type == 'application/octet-stream'
+        self.app.endpoint(Upload)
+        with NamedTemporaryFile() as tmpfile:
+            response = self.client.post('/upload', files={'photo': tmpfile.name})
+            self.assertEqual(response.status, 200)
