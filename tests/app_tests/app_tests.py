@@ -1,9 +1,11 @@
 from unittest import TestCase
 from unittest.mock import Mock
 
+from jinja2 import Environment
+
 from gatekeeper.app import App
 from gatekeeper.endpoints.endpoint import Endpoint
-from gatekeeper.exceptions import DuplicateEndpoints, AmbiguousEndpoints
+from gatekeeper.exceptions import DuplicateEndpoints, AmbiguousEndpoints, JinjaEnvNotSet
 
 
 class AppTestCase(TestCase):
@@ -84,3 +86,41 @@ class AppTestCase(TestCase):
         start_response = Mock()
         with self.assertRaises(AmbiguousEndpoints):
             app(env, start_response)
+
+    def test_set_jinja_env(self):
+        app = App()
+        app.set_jinja_env({'tests.app_tests.hello': 'templates'})
+        self.assertIsInstance(app.jinja_env, Environment)
+
+    def test_render(self):
+        app = App()
+        app.set_jinja_env({
+            'tests.app_tests.base': 'base_templates',
+            'tests.app_tests.hello': 'hello_templates',
+        })
+        text = app.render('tests.app_tests.hello/hello.html', {'name': 'John'})
+        self.assertEqual(text, '<body><h1>Hello John</h1></body>')
+
+    def test_render_can_be_called_without_context(self):
+        app = App()
+        app.set_jinja_env({
+            'tests.app_tests.base': 'base_templates',
+            'tests.app_tests.hello': 'hello_templates',
+        })
+        text = app.render('tests.app_tests.hello/hello.html')
+        self.assertEqual(text, '<body><h1>Hello </h1></body>')
+
+    def test_render_can_be_called_with_locals_as_context(self):
+        app = App()
+        app.set_jinja_env({
+            'tests.app_tests.base': 'base_templates',
+            'tests.app_tests.hello': 'hello_templates',
+        })
+        name = 'John'
+        text = app.render('tests.app_tests.hello/hello.html', locals())
+        self.assertEqual(text, '<body><h1>Hello John</h1></body>')
+
+    def test_calling_render_without_setting_jinja_env_raises_exception(self):
+        app = App()
+        with self.assertRaises(JinjaEnvNotSet):
+            app.render('tests.app_tests.hello/hello.html')

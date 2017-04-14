@@ -24,3 +24,10 @@ class AmbiguousEndpoints(Exception):
     def __init__(self, path):
         message = 'The same path is leading to different endpoints: ' + path
         super(AmbiguousEndpoints, self).__init__(message)
+
+
+class JinjaEnvNotSet(Exception):
+
+    def __init__(self):
+        message = 'You need to set a Jinja environment before calling render'
+        super(JinjaEnvNotSet, self).__init__(message)
