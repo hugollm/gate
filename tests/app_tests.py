@@ -7,13 +7,27 @@ from gatekeeper.endpoints.endpoint import Endpoint
 
 class AppTestCase(TestCase):
 
-    def test_app_without_endpoints_responds_with_404(self):
-        app = App()
-        env = {'REQUEST_METHOD': 'GET', 'PATH_INFO': '/'}
+    def assert_call(self, app, method, path, expected_status=None, expected_headers=None, expected_body=None):
+        env = {'REQUEST_METHOD': method, 'PATH_INFO': path}
         start_response = Mock()
         body = app(env, start_response)
-        start_response.assert_called_once_with('404 Not Found', list({'Content-Type': 'text/plain; charset=utf-8'}.items()))
-        self.assertEqual(body, (b'',))
+        status = start_response.call_args[0][0]
+        headers = start_response.call_args[0][1]
+        if expected_status is not None:
+            self.assertEqual(status, expected_status)
+        if expected_headers is not None:
+            expected_headers = sorted(expected_headers.items())
+            headers = sorted(headers)
+            self.assertEqual(headers, expected_headers)
+        if expected_body is not None:
+            self.assertEqual(body, (expected_body,))
+
+    def test_app_without_endpoints_responds_with_404(self):
+        app = App()
+        expected_status = '404 Not Found'
+        expected_headers = {'Content-Type': 'text/plain; charset=utf-8', 'Content-Length': '0'}
+        expected_body = b''
+        self.assert_call(app, 'GET', '/', expected_status, expected_headers, expected_body)
 
     def test_app_routes_request_to_endpoint_if_it_matches(self):
         class Hello(Endpoint):
@@ -22,11 +36,10 @@ class AppTestCase(TestCase):
                 response.body = b'hello world'
         app = App()
         app.endpoint(Hello)
-        env = {'REQUEST_METHOD': 'GET', 'PATH_INFO': '/hello'}
-        start_response = Mock()
-        body = app(env, start_response)
-        start_response.assert_called_once_with('200 OK', list({'Content-Type': 'text/plain; charset=utf-8'}.items()))
-        self.assertEqual(body, (b'hello world',))
+        expected_status = '200 OK'
+        expected_headers = {'Content-Type': 'text/plain; charset=utf-8', 'Content-Length': '11'}
+        expected_body = b'hello world'
+        self.assert_call(app, 'GET', '/hello', expected_status, expected_headers, expected_body)
 
     def test_app_does_not_route_request_to_endpoint_if_it_does_not_match(self):
         class Hello(Endpoint):
@@ -35,11 +48,10 @@ class AppTestCase(TestCase):
                 response.body = b'hello world'
         app = App()
         app.endpoint(Hello)
-        env = {'REQUEST_METHOD': 'GET', 'PATH_INFO': '/world'}
-        start_response = Mock()
-        body = app(env, start_response)
-        start_response.assert_called_once_with('404 Not Found', list({'Content-Type': 'text/plain; charset=utf-8'}.items()))
-        self.assertEqual(body, (b'',))
+        expected_status = '404 Not Found'
+        expected_headers = {'Content-Type': 'text/plain; charset=utf-8', 'Content-Length': '0'}
+        expected_body = b''
+        self.assert_call(app, 'GET', '/world', expected_status, expected_headers, expected_body)
 
     def test_app_raises_if_two_endpoints_with_exactly_the_same_path_are_registered(self):
         class Hello1(Endpoint):

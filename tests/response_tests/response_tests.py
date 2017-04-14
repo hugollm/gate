@@ -12,6 +12,20 @@ from gatekeeper.responses.response import Response
 
 class ResponseTestCase(TestCase):
 
+    def assert_response(self, response, expected_status=None, expected_headers=None, expected_body=None):
+        start_response = Mock()
+        body = response.wsgi(start_response)
+        status = start_response.call_args[0][0]
+        headers = start_response.call_args[0][1]
+        if expected_status is not None:
+            self.assertEqual(status, expected_status)
+        if expected_headers is not None:
+            expected_headers = sorted(expected_headers.items())
+            headers = sorted(headers)
+            self.assertEqual(headers, expected_headers)
+        if expected_body is not None:
+            self.assertEqual(body, (expected_body,))
+
     def test_default_values(self):
         response = Response()
         self.assertEqual(response.status, 200)
@@ -54,15 +68,31 @@ class ResponseTestCase(TestCase):
         response.status = 400
         response.headers['Content-Type'] = 'application/json'
         response.body = b'{"error": "Invalid token"}'
-        start_respose = Mock()
-        body = response.wsgi(start_respose)
-        start_respose.assert_called_with('400 Bad Request', list({'Content-Type': 'application/json'}.items()))
-        self.assertEqual(body, (b'{"error": "Invalid token"}',))
+        expected_status = '400 Bad Request'
+        expected_headers = {'Content-Type': 'application/json', 'Content-Length': '26'}
+        expected_body = b'{"error": "Invalid token"}'
+        self.assert_response(response, expected_status, expected_headers, expected_body)
 
     def test_string_body_gets_converted_to_bytes(self):
         response = Response()
         response.body = 'hello world'
         self.assertEqual(response._wsgi_body(), (b'hello world',))
+
+    def test_content_length_header_is_set_for_the_response(self):
+        response = Response()
+        response.body = 'hello world'
+        expected_status = '200 OK'
+        expected_headers = {'Content-Type': 'text/plain; charset=utf-8', 'Content-Length': '11'}
+        expected_body = b'hello world'
+        self.assert_response(response, expected_status, expected_headers, expected_body)
+
+    def test_content_length_header_is_correct_even_with_special_characters_in_body(self):
+        response = Response()
+        response.body = 'blasé'
+        expected_status = '200 OK'
+        expected_headers = {'Content-Type': 'text/plain; charset=utf-8', 'Content-Length': '6'}
+        expected_body = 'blasé'.encode('utf-8')
+        self.assert_response(response, expected_status, expected_headers, expected_body)
 
     def test_file_gets_returned_as_generator_to_wsgi(self):
         response = Response()

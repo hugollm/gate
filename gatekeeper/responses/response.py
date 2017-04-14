@@ -87,12 +87,19 @@ class Response(BaseException):
         headers = list(self.headers.items())
         for cookie in self.cookies:
             headers.append(('Set-Cookie', cookie))
+        if 'Content-Length' not in self.headers:
+            self._convert_body_to_bytes()
+            length = str(len(self.body))
+            headers.append(('Content-Length', length))
         return headers
 
     def _wsgi_body(self):
+        self._convert_body_to_bytes()
+        return (self.body,)
+
+    def _convert_body_to_bytes(self):
         if type(self.body) is not bytes:
             self.body = self.body.encode('utf-8')
-        return (self.body,)
 
     def _wsgi_file(self):
         with open(self._file, 'rb') as f:
