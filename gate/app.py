@@ -12,11 +12,12 @@ class App(object):
         self.jinja_env = None
 
     def set_jinja_env(self, package_map):
-        from jinja2 import Environment, PrefixLoader, PackageLoader
+        from jinja2 import Environment, PrefixLoader, PackageLoader, select_autoescape
         loader_map = {}
         for package, directory in package_map.items():
             loader_map[package] = PackageLoader(package, directory)
-        self.jinja_env = Environment(loader=PrefixLoader(loader_map))
+        autoescape = select_autoescape(default=True, default_for_string=True)
+        self.jinja_env = Environment(loader=PrefixLoader(loader_map), autoescape=autoescape)
 
     def render(self, template_identifier, context=None):
         from jinja2 import Template

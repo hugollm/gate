@@ -194,3 +194,12 @@ class AppTestCase(TestCase):
         })
         app.endpoint(NoJinjaEnv)
         self.assert_call(app, 'GET', '/', '200 OK')
+
+    def test_templates_are_in_autoescape_mode_by_default(self):
+        app = App()
+        app.set_jinja_env({
+            'tests.app_tests.base': 'base_templates',
+            'tests.app_tests.hello': 'hello_templates',
+        })
+        text = app.render('tests.app_tests.hello/markup.html', {'name': 'John'})
+        self.assertEqual(text, '<body>&lt;h1&gt;Hello World&lt;/h1&gt;</body>')
