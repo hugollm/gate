@@ -77,6 +77,16 @@ class EndpointTestCase(TestCase):
         endpoint.path = '/users/:id'
         self.assertEqual(endpoint._path_regex(), r'^/users/(?P<id>[^\/]+)$')
 
+    def test_endpoint_does_not_transform_any_colon_in_simple_pattern(self):
+        endpoint = Endpoint()
+        endpoint.path = '/users/foo:id'
+        self.assertEqual(endpoint._path_regex(), None)
+
+    def test_endpoint_does_not_transform_consider_simple_pattern_if_theres_no_name_on_arg(self):
+        endpoint = Endpoint()
+        endpoint.path = '/users/:'
+        self.assertEqual(endpoint._path_regex(), None)
+
     def test_path_regex_when_path_is_explicit_regex(self):
         endpoint = Endpoint()
         endpoint.path = r'^/static/(?P<path>.+)$'

@@ -17,15 +17,19 @@ class Endpoint(object):
             self._compiled_regex = re.compile(regex)
 
     def _path_regex(self):
-        if self._path_is_simple_pattern():
-            return self._simple_pattern_to_regex(self.path)
-        elif self._path_is_regex():
+        if self._path_is_regex():
             return self.path
+        elif self._path_is_simple_pattern():
+            return self._simple_pattern_to_regex(self.path)
         else:
             return None
 
     def _path_is_simple_pattern(self):
-        return self.path and not self._path_is_regex() and ':' in self.path
+        return (
+            self.path and
+            not self._path_is_regex() and
+            re.match(r'.*\/:[^\/]+.*', self.path)
+        )
 
     def _path_is_regex(self):
         return self.path and self.path.startswith('^')
