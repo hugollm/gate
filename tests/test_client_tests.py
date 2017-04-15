@@ -1,11 +1,11 @@
 from tempfile import NamedTemporaryFile
 from unittest import TestCase
 
-from gatekeeper.app import App
-from gatekeeper.test_client import TestClient
-from gatekeeper.endpoints.endpoint import Endpoint
-from gatekeeper.endpoints.html_endpoint import HtmlEndpoint
-from gatekeeper.endpoints.json_endpoint import JsonEndpoint
+from gate.app import App
+from gate.test_client import TestClient
+from gate.endpoints.endpoint import Endpoint
+from gate.endpoints.html_endpoint import HtmlEndpoint
+from gate.endpoints.json_endpoint import JsonEndpoint
 
 
 class TestClientTestCase(TestCase):

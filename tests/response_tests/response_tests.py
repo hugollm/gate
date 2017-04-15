@@ -7,7 +7,7 @@ from types import GeneratorType
 from unittest import TestCase
 from unittest.mock import Mock
 
-from gatekeeper.responses.response import Response
+from gate.responses.response import Response
 
 
 class ResponseTestCase(TestCase):

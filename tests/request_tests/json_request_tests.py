@@ -1,7 +1,7 @@
 import json
 from unittest import TestCase
 
-from gatekeeper.requests.json_request import JsonRequest
+from gate.requests.json_request import JsonRequest
 from .factory import mock_env
 
 
