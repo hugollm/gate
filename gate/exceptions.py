@@ -12,17 +12,11 @@ class UploadTargetAlreadyExists(Exception):
         super(UploadTargetAlreadyExists, self).__init__(message)
 
 
-class DuplicateEndpoints(Exception):
-
-    def __init__(self, path):
-        message = 'Cannot register two endpoints with the same path: ' + path
-        super(DuplicateEndpoints, self).__init__(message)
-
-
 class AmbiguousEndpoints(Exception):
 
-    def __init__(self, path):
-        message = 'The same path is leading to different endpoints: ' + path
+    def __init__(self, request):
+        message = 'The same request is leading to different endpoints: '
+        message += request.method + ' ' + request.path
         super(AmbiguousEndpoints, self).__init__(message)
 
 

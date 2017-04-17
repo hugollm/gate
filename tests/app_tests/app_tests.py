@@ -6,7 +6,7 @@ from jinja2 import Environment
 from gate.app import App
 from gate.endpoints.endpoint import Endpoint
 from gate.endpoints.html_endpoint import HtmlEndpoint
-from gate.exceptions import DuplicateEndpoints, AmbiguousEndpoints, JinjaEnvNotSet
+from gate.exceptions import AmbiguousEndpoints, JinjaEnvNotSet
 
 
 class AppTestCase(TestCase):
@@ -57,21 +57,21 @@ class AppTestCase(TestCase):
         expected_body = b''
         self.assert_call(app, 'GET', '/world', expected_status, expected_headers, expected_body)
 
-    def test_app_raises_if_two_endpoints_with_exactly_the_same_path_are_registered(self):
+    def test_app_allows_two_endpoints_with_the_same_path_if_the_method_is_different(self):
         class Hello1(Endpoint):
             path = '/hello'
             def get(self, request, response):
                 pass
         class Hello2(Endpoint):
             path = '/hello'
-            def get(self, request, response):
+            def post(self, request, response):
                 pass
         app = App()
         app.endpoint(Hello1)
-        with self.assertRaises(DuplicateEndpoints):
-            app.endpoint(Hello2)
+        app.endpoint(Hello2)
+        self.assert_call(app, 'GET', '/hello', '200 OK')
 
-    def test_app_raises_if_a_path_lead_to_more_than_one_endpoint(self):
+    def test_app_raises_if_a_request_leads_to_more_than_one_endpoint(self):
         class User1(Endpoint):
             path = '/users/:id'
             def get(self, request, response):

@@ -1,14 +1,13 @@
 from .requests.request import Request
 from .responses.response import Response
 from .endpoints.html_endpoint import HtmlEndpoint
-from .exceptions import DuplicateEndpoints, AmbiguousEndpoints, JinjaEnvNotSet
+from .exceptions import AmbiguousEndpoints, JinjaEnvNotSet
 
 
 class App(object):
 
     def __init__(self):
         self.endpoints = []
-        self.paths = set()
         self.jinja_env = None
 
     def set_jinja_env(self, package_map):
@@ -30,9 +29,6 @@ class App(object):
 
     def endpoint(self, endpoint_class):
         endpoint = endpoint_class()
-        if endpoint.path in self.paths:
-            raise DuplicateEndpoints(endpoint.path)
-        self.paths.add(endpoint.path)
         if self.jinja_env and isinstance(endpoint, HtmlEndpoint):
             endpoint.jinja_env = self.jinja_env
         self.endpoints.append(endpoint)
@@ -54,7 +50,7 @@ class App(object):
             if endpoint.match_request(request):
                 matched_endpoints.append(endpoint)
         if len(matched_endpoints) > 1:
-            raise AmbiguousEndpoints(request.path)
+            raise AmbiguousEndpoints(request)
         elif matched_endpoints:
             endpoint = matched_endpoints.pop()
             return endpoint.handle_request(request)
