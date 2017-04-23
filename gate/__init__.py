@@ -11,3 +11,5 @@ from .requests.json_request import JsonRequest
 from .responses.response import Response
 from .responses.html_response import HtmlResponse
 from .responses.json_response import JsonResponse
+
+from .test_client import TestClient
