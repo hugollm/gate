@@ -1,4 +1,3 @@
-import json
 from unittest import TestCase
 
 from gate.requests.json_request import JsonRequest
@@ -21,7 +20,7 @@ class JsonRequestTestCase(TestCase):
         env['wsgi.input'].write(b'')
         env['wsgi.input'].seek(0)
         request = JsonRequest(env)
-        with self.assertRaises(json.decoder.JSONDecodeError):
+        with self.assertRaises(ValueError):
             request.json
 
     def test_null(self):
