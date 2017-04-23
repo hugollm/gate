@@ -2,6 +2,9 @@
 
 Gate is a python library that uses the Web Ser Gateway Interface (WSGI) to handle incoming HTTP requests. It's packed with features to help routing, handling, and extracting information from requests, as well as options to help writing appropriate responses.
 
+[![Build Status](https://travis-ci.org/hugollm/gate.svg?branch=master)](https://travis-ci.org/hugollm/gate)
+[![Coverage Status](https://coveralls.io/repos/github/hugollm/gate/badge.svg?branch=tmp)](https://coveralls.io/github/hugollm/gate?branch=tmp)
+
 
 ## Hello World
 
