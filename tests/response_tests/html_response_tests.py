@@ -1,5 +1,5 @@
 from unittest import TestCase
-from gate.responses.html_response import HtmlResponse
+from gatekeeper.responses.html_response import HtmlResponse
 
 
 class HtmlResponseTestCase(TestCase):

@@ -1,9 +1,9 @@
 from unittest import TestCase
 from unittest.mock import Mock
 
-from gate.requests.request import Request
-from gate.responses.response import Response
-from gate.endpoints.endpoint import Endpoint
+from gatekeeper.requests.request import Request
+from gatekeeper.responses.response import Response
+from gatekeeper.endpoints.endpoint import Endpoint
 
 
 class EndpointTestCase(TestCase):

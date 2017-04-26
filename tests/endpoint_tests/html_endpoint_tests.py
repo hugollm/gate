@@ -1,9 +1,9 @@
 from unittest import TestCase
 from unittest.mock import Mock
 
-from gate.requests.request import Request
-from gate.requests.html_request import HtmlRequest
-from gate.endpoints.html_endpoint import HtmlEndpoint
+from gatekeeper.requests.request import Request
+from gatekeeper.requests.html_request import HtmlRequest
+from gatekeeper.endpoints.html_endpoint import HtmlEndpoint
 
 
 class HtmlEndpointTestCase(TestCase):

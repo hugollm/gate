@@ -1,9 +1,9 @@
 import os
 from unittest import TestCase
 
-from gate.requests.request import Request
-from gate.responses.response import Response
-from gate.exceptions import ResponseNotSet
+from gatekeeper.requests.request import Request
+from gatekeeper.responses.response import Response
+from gatekeeper.exceptions import ResponseNotSet
 from .factory import mock_env
 
 

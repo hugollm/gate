@@ -1,5 +1,5 @@
 from unittest import TestCase
-from gate.responses.json_response import JsonResponse
+from gatekeeper.responses.json_response import JsonResponse
 
 
 class JsonResponseTestCase(TestCase):

@@ -1,7 +1,7 @@
-name = 'gate'
+name = 'gatekeeper'
 version = '0.0.0'
 
-packages = ['gate', 'gate.endpoints', 'gate.requests', 'gate.responses']
+packages = ['gatekeeper', 'gatekeeper.endpoints', 'gatekeeper.requests', 'gatekeeper.responses']
 files = ['LICENSE']
 requirements = []
 scripts = []
@@ -9,11 +9,11 @@ scripts = []
 author = 'Hugo Leonardo Leão Mota'
 author_email = 'hugo.txt@gmail.com'
 license = 'MIT'
-url = 'https://github.com/hugollm/gate'
+url = 'https://github.com/hugollm/gatekeeper'
 
-keywords = 'gate http routing wsgi endpoint request response'
+keywords = 'gatekeeper http routing wsgi endpoint request response'
 description = 'Python library handle incoming HTTP requests.'
 
 long_description = """
-Gate is a python library that uses the Web Ser Gateway Interface (WSGI) to handle incoming HTTP requests. It's packed with features to help routing, handling, and extracting information from requests, as well as options to help writing appropriate responses.
+Gatekeeper is a python library that uses the Web Ser Gateway Interface (WSGI) to handle incoming HTTP requests. It's packed with features to help routing, handling, and extracting information from requests, as well as options to help writing appropriate responses.
 """

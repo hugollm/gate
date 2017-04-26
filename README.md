@@ -1,17 +1,17 @@
-# Gate
+# Gatekeeper
 
-Gate is a python library that uses the Web Ser Gateway Interface (WSGI) to handle incoming HTTP requests. It's packed with features to help routing, handling, and extracting information from requests, as well as options to help writing appropriate responses.
+Gatekeeper is a python library that uses the Web Ser Gateway Interface (WSGI) to handle incoming HTTP requests. It's packed with features to help routing, handling, and extracting information from requests, as well as options to help writing appropriate responses.
 
-[![Build Status](https://travis-ci.org/hugollm/gate.svg?branch=master)](https://travis-ci.org/hugollm/gate)
-[![Coverage Status](https://coveralls.io/repos/github/hugollm/gate/badge.svg?branch=tmp)](https://coveralls.io/github/hugollm/gate?branch=tmp)
+[![Build Status](https://travis-ci.org/hugollm/gatekeeper.svg?branch=master)](https://travis-ci.org/hugollm/gatekeeper)
+[![Coverage Status](https://coveralls.io/repos/github/hugollm/gatekeeper/badge.svg?branch=tmp)](https://coveralls.io/github/hugollm/gatekeeper?branch=tmp)
 
 
 ## Hello World
 
-A simple hello world example with gate looks like:
+A simple hello world example with gatekeeper looks like:
 
 ```python
-from gate import App, HtmlEndpoint
+from gatekeeper import App, HtmlEndpoint
 
 
 class HelloWorld(HtmlEndpoint):
@@ -38,7 +38,7 @@ You should see the "Hello World" message in your browser on `localhost:8000`.
 The `App` object is responsible to hold a list of **endpoints** and providing a WSGI interface so web servers (like gunicorn) can route requests to it. Example:
 
 ```python
-from gate import App
+from gatekeeper import App
 from . import endpoints
 
 
@@ -52,7 +52,7 @@ app.endpoint(endpoints.DeleteUser)
 The above examples assumes you created an `endpoints.py` file with all those endpoints. To give an example of the routing, the `DeleteUser` endpoint in the example could look like this:
 
 ```python
-from gate import HtmlEndpoint
+from gatekeeper import HtmlEndpoint
 
 
 class DeleteUser(HtmlEndpoint):
@@ -80,7 +80,7 @@ The app, which is handling incoming requests, only routes to the `DeleteUser` if
 Requests are routed by the `App` object, chosing and adequate endpoint to handle the request. Is the responsibility of the endpoint itself to tell if it can handle the request or not. It does that with the `path` attribute and an `http method`. Example:
 
 ```python
-from gate import Endpoint
+from gatekeeper import Endpoint
 
 
 class ListUsers(Endpoint):
@@ -96,7 +96,7 @@ The endpoint above will be able to handle `GET` requests to the `/users` path. I
 The `path` can also contain simple patterns with variables in it. Those variables are stored in the `request.args` attribute. Example:
 
 ```python
-from gate import HtmlEndpoint
+from gatekeeper import HtmlEndpoint
 
 
 class Hello(HtmlEndpoint):
@@ -132,7 +132,7 @@ There's three types of endpoints. A generic `Endpoint` and two subclasses `HtmlE
 The generic `Endpoint` is agnostic about the type of requests and responses you will be handling. It gives generic `Request` and `Response` objects to the handling method to manipulate. Example:
 
 ```python
-from gate import Endpoint
+from gatekeeper import Endpoint
 
 
 class Hello(Endpoint):
@@ -147,7 +147,7 @@ class Hello(Endpoint):
 The `HtmlEndpoint` assumes you're dealing with a regular HTML application, accessing links, submitting forms, etc. It will give you `HtmlRequest` and `HtmlResponse` objects, which have special capabilities to parse and render information in these kind of application. Example:
 
 ```python
-from gate import HtmlEndpoint
+from gatekeeper import HtmlEndpoint
 
 
 class Hello(HtmlEndpoint):
@@ -161,7 +161,7 @@ class Hello(HtmlEndpoint):
 The `JsonEndpoint` is specialized in JSON APIs, so it gives the handling method a `JsonRequest` and `JsonResponse` that are already prepared to handle JSON information. Example:
 
 ```python
-from gate import JsonEndpoint
+from gatekeeper import JsonEndpoint
 
 
 class Hello(JsonEndpoint):
@@ -175,7 +175,7 @@ class Hello(JsonEndpoint):
 Endpoints can also define hooks to be executed **before** and **after** a request, as well as when an **exception** is raised. Example:
 
 ```python
-from gate import JsonEndpoint
+from gatekeeper import JsonEndpoint
 
 
 class AuthorizedEndpoint(JsonEndpoint):
@@ -372,7 +372,7 @@ The `TestClient` exists so you can test your `App` as an user, making requests t
 
 ```python
 from unittest import TestCase
-from gate import TestClient
+from gatekeeper import TestClient
 from .myapp import app
 
 

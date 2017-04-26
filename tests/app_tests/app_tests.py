@@ -3,10 +3,10 @@ from unittest.mock import Mock
 
 from jinja2 import Environment
 
-from gate.app import App
-from gate.endpoints.endpoint import Endpoint
-from gate.endpoints.html_endpoint import HtmlEndpoint
-from gate.exceptions import AmbiguousEndpoints, JinjaEnvNotSet
+from gatekeeper.app import App
+from gatekeeper.endpoints.endpoint import Endpoint
+from gatekeeper.endpoints.html_endpoint import HtmlEndpoint
+from gatekeeper.exceptions import AmbiguousEndpoints, JinjaEnvNotSet
 
 
 class AppTestCase(TestCase):
