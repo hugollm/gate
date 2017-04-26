@@ -3,7 +3,7 @@
 Gatekeeper is a python library that uses the Web Ser Gateway Interface (WSGI) to handle incoming HTTP requests. It's packed with features to help routing, handling, and extracting information from requests, as well as options to help writing appropriate responses.
 
 [![Build Status](https://travis-ci.org/hugollm/gatekeeper.svg?branch=master)](https://travis-ci.org/hugollm/gatekeeper)
-[![Coverage Status](https://coveralls.io/repos/github/hugollm/gatekeeper/badge.svg?branch=tmp)](https://coveralls.io/github/hugollm/gatekeeper?branch=tmp)
+[![Coverage Status](https://coveralls.io/repos/github/hugollm/gatekeeper/badge.svg?branch=master)](https://coveralls.io/github/hugollm/gatekeeper?branch=master)
 
 
 ## Hello World
