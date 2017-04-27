@@ -7,6 +7,13 @@ Gatekeeper is a python library that uses the Web Ser Gateway Interface (WSGI) to
 [![Coverage Status](https://coveralls.io/repos/github/hugollm/gatekeeper/badge.svg?branch=master)](https://coveralls.io/github/hugollm/gatekeeper?branch=master)
 
 
+## Install
+
+Gatekeeper is available in the Python Package Index. So you can just:
+
+    pip install gatekeeper
+
+
 ## Hello World
 
 A simple hello world example with gatekeeper looks like:
