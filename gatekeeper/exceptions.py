@@ -25,3 +25,10 @@ class JinjaEnvNotSet(Exception):
     def __init__(self):
         message = 'You need to set a Jinja environment before calling render'
         super(JinjaEnvNotSet, self).__init__(message)
+
+
+class InvalidDirectory(Exception):
+
+    def __init__(self, path):
+        message = 'Provided path is not a valid directory: ' + path
+        super(InvalidDirectory, self).__init__(message)

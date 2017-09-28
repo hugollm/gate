@@ -1,13 +1,16 @@
+import os.path
+
 from .requests.request import Request
 from .responses.response import Response
 from .endpoints.html_endpoint import HtmlEndpoint
-from .exceptions import AmbiguousEndpoints, JinjaEnvNotSet
+from .exceptions import AmbiguousEndpoints, JinjaEnvNotSet, InvalidDirectory
 
 
 class App(object):
 
     def __init__(self):
         self.endpoints = []
+        self.static_paths = []
         self.jinja_env = None
 
     def set_jinja_env(self, package_map):
@@ -33,18 +36,35 @@ class App(object):
             endpoint.jinja_env = self.jinja_env
         self.endpoints.append(endpoint)
 
+    def static(self, path):
+        if not os.path.isdir(path):
+            raise InvalidDirectory(path)
+        self.static_paths.append(path)
+
     def __call__(self, env, start_response):
         request = Request(env)
         response = self.handle_request(request)
         return response.wsgi(start_response)
 
     def handle_request(self, request):
-        response = self._try_to_get_response_from_an_endpoint(request)
-        if response is None:
-            response = self._response_404()
-        return response
+        response = self._try_response_for_static_file(request)
+        if response:
+            return response
+        response = self._try_response_from_an_endpoint(request)
+        if response:
+            return response
+        return self._response_404()
 
-    def _try_to_get_response_from_an_endpoint(self, request):
+    def _try_response_for_static_file(self, request):
+        for base_path in self.static_paths:
+            path = os.path.join(base_path, request.path.lstrip('/'))
+            if os.path.isfile(path):
+                response = Response()
+                response.file(path)
+                return response
+        return None
+
+    def _try_response_from_an_endpoint(self, request):
         matched_endpoints = []
         for endpoint in self.endpoints:
             if endpoint.match_request(request):
