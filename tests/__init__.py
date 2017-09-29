@@ -13,6 +13,7 @@ from .endpoint_tests.html_endpoint_tests import HtmlEndpointTestCase
 from .app_tests.app_endpoint_tests import AppEndpointTestCase
 from .app_tests.app_template_tests import AppTemplateTestCase
 from .app_tests.app_static_tests import AppStaticTestCase
+from .app_tests.app_pages_tests import AppPagesTestCase
 
 from .test_client_tests import TestClientTestCase
 from .template_renderer_tests.template_renderer_tests import TemplateRendererTestCase

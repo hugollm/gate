@@ -4,6 +4,7 @@ from .requests.request import Request
 from .responses.response import Response
 from .endpoints.html_endpoint import HtmlEndpoint
 from .exceptions import AmbiguousEndpoints, JinjaEnvNotSet, InvalidDirectory
+from .template_renderer import TemplateRenderer
 
 
 class App(object):
@@ -12,6 +13,7 @@ class App(object):
         self.endpoints = []
         self.static_paths = []
         self.jinja_env = None
+        self.template_renderer = TemplateRenderer()
 
     def set_jinja_env(self, package_map):
         from jinja2 import Environment, PrefixLoader, PackageLoader, select_autoescape
@@ -41,6 +43,11 @@ class App(object):
             raise InvalidDirectory(path)
         self.static_paths.append(path)
 
+    def pages(self, path):
+        if not os.path.isdir(path):
+            raise InvalidDirectory(path)
+        self.template_renderer.add_directory(path)
+
     def __call__(self, env, start_response):
         request = Request(env)
         response = self.handle_request(request)
@@ -48,6 +55,9 @@ class App(object):
 
     def handle_request(self, request):
         response = self._try_response_for_static_file(request)
+        if response:
+            return response
+        response = self._try_response_from_page(request)
         if response:
             return response
         response = self._try_response_from_an_endpoint(request)
@@ -62,6 +72,33 @@ class App(object):
                 response = Response()
                 response.file(path)
                 return response
+        return None
+
+    def _try_response_from_page(self, request):
+        page = request.path.strip('/')
+        if os.path.basename(page) == 'index':
+            return None
+        for directory in self.template_renderer.directories:
+            if page:
+                response = self._try_page(directory, page)
+                if response:
+                    return response
+            response = self._try_page(directory, page, index=True)
+            if response:
+                return response
+        return None
+
+    def _try_page(self, directory, page, index=False):
+        template_path = page
+        if index:
+            template_path += '/index'
+        template_path += '.html'
+        full_path = os.path.join(directory, template_path.lstrip('/'))
+        if os.path.isfile(full_path):
+            response = Response()
+            response.headers['Content-Type'] = 'text/html; charset=utf-8'
+            response.body = self.template_renderer.render(template_path)
+            return response
         return None
 
     def _try_response_from_an_endpoint(self, request):
