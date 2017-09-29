@@ -15,3 +15,4 @@ from .app_tests.app_template_tests import AppTemplateTestCase
 from .app_tests.app_static_tests import AppStaticTestCase
 
 from .test_client_tests import TestClientTestCase
+from .template_renderer_tests.template_renderer_tests import TemplateRendererTestCase
