@@ -15,13 +15,17 @@ class App(object):
 
     def __init__(self):
         self.endpoints = []
+        self.registered_endpoint_classes = set()
         self.static_paths = []
         self.template_renderer = TemplateRenderer()
 
     def endpoint(self, endpoint_class):
+        if endpoint_class in self.registered_endpoint_classes:
+            return
         endpoint = endpoint_class()
         endpoint.template_renderer = self.template_renderer
         self.endpoints.append(endpoint)
+        self.registered_endpoint_classes.add(endpoint_class)
 
     def static(self, path):
         if not os.path.isdir(path):

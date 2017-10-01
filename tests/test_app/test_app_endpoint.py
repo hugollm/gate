@@ -75,3 +75,13 @@ class AppEndpointTestCase(AppTestCase):
         app = App()
         app.endpoint(Endpoint)
         self.assertEqual(app.endpoints[0].template_renderer, app.template_renderer)
+
+    def test_app_ignore_already_registered_endpoints(self):
+        class Hello(Endpoint):
+            path = '/hello'
+            def get(self, request, response):
+                response.body = b'hello world'
+        app = App()
+        app.endpoint(Hello)
+        app.endpoint(Hello)
+        self.assertEqual(len(app.endpoints), 1)
