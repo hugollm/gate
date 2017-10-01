@@ -31,3 +31,10 @@ class AppPackageTestCase(AppTestCase):
         app.package('tests.test_app.resources.empty_package')
         self.assert_call(app, 'GET', '/hello', '200 OK')
         self.assert_call(app, 'GET', '/hello2', '200 OK')
+
+    def test_imported_endpoints_used_for_inheritance_dont_get_mistakenly_registered(self):
+        app = App()
+        app.package('tests.test_app.resources.package3')
+        from .resources.package1.endpoints.hello import Hello
+        for endpoint in app.endpoints:
+            self.assertIsNot(endpoint.__class__, Hello)

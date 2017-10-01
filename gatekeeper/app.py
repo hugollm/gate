@@ -45,7 +45,7 @@ class App(object):
             module = import_module(module_path)
             classes = getmembers(module, isclass)
             for class_name, cls in classes:
-                if issubclass(cls, Endpoint) and getattr(cls, 'path'):
+                if issubclass(cls, Endpoint) and cls.__module__.startswith(package_path):
                     self.endpoint(cls)
 
     def __call__(self, env, start_response):
