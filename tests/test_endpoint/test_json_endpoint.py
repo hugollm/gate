@@ -1,9 +1,7 @@
 from unittest import TestCase
 from unittest.mock import Mock
 
-from gatekeeper.requests.request import Request
-from gatekeeper.requests.json_request import JsonRequest
-from gatekeeper.endpoints.json_endpoint import JsonEndpoint
+from gatekeeper import Request, JsonRequest, JsonEndpoint
 
 
 class JsonEndpointTestCase(TestCase):

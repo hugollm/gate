@@ -1,7 +1,6 @@
 from .app_test_case import AppTestCase
 
-from gatekeeper.app import App
-from gatekeeper.endpoints.endpoint import Endpoint
+from gatekeeper import App, Endpoint
 from gatekeeper.exceptions import InvalidDirectory
 
 

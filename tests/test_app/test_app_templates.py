@@ -2,9 +2,7 @@ from .app_test_case import AppTestCase
 
 from jinja2 import Environment
 
-from gatekeeper.app import App
-from gatekeeper.endpoints.endpoint import Endpoint
-from gatekeeper.endpoints.html_endpoint import HtmlEndpoint
+from gatekeeper import App, Endpoint, HtmlEndpoint
 from gatekeeper.exceptions import JinjaEnvNotSet
 
 

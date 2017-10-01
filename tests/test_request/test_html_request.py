@@ -2,7 +2,7 @@ import os
 from unittest import TestCase
 from warnings import catch_warnings
 
-from gatekeeper.requests.html_request import HtmlRequest
+from gatekeeper import HtmlRequest
 from gatekeeper.exceptions import UploadTargetAlreadyExists
 from .factory import mock_env
 
