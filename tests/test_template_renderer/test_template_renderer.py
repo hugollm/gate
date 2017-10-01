@@ -67,3 +67,10 @@ class TemplateRendererTestCase(TestCase):
         text2 = renderer.render('tests.test_template_renderer.resources.package2/simple.html')
         self.assertEqual(text1, '<h1>Simple</h1>')
         self.assertEqual(text2, '<h1>Simple</h1>')
+
+    def test_renderer_still_works_after_adding_empty_package(self):
+        renderer = TemplateRenderer()
+        renderer.add_package('tests.test_template_renderer.resources.package1')
+        renderer.add_package('tests.test_template_renderer.resources.empty_package')
+        text = renderer.render('tests.test_template_renderer.resources.package1/simple.html')
+        self.assertEqual(text, '<h1>Simple</h1>')
