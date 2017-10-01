@@ -7,7 +7,7 @@ from .requests.request import Request
 from .responses.response import Response
 from .endpoints.endpoint import Endpoint
 from .endpoints.html_endpoint import HtmlEndpoint
-from .exceptions import AmbiguousEndpoints, JinjaEnvNotSet, InvalidDirectory
+from .exceptions import AmbiguousEndpoints, InvalidDirectory
 from .template_renderer import TemplateRenderer
 
 
@@ -16,30 +16,11 @@ class App(object):
     def __init__(self):
         self.endpoints = []
         self.static_paths = []
-        self.jinja_env = None
         self.template_renderer = TemplateRenderer()
-
-    def set_jinja_env(self, package_map):
-        from jinja2 import Environment, PrefixLoader, PackageLoader, select_autoescape
-        loader_map = {}
-        for package, directory in package_map.items():
-            loader_map[package] = PackageLoader(package, directory)
-        autoescape = select_autoescape(default=True, default_for_string=True)
-        self.jinja_env = Environment(loader=PrefixLoader(loader_map), autoescape=autoescape)
-
-    def render(self, template_identifier, context=None):
-        from jinja2 import Template
-        if self.jinja_env is None:
-            raise JinjaEnvNotSet()
-        template = self.jinja_env.get_template(template_identifier)
-        context = context or {}
-        context.pop('self', None)
-        return template.render(**context)
 
     def endpoint(self, endpoint_class):
         endpoint = endpoint_class()
-        if self.jinja_env and isinstance(endpoint, HtmlEndpoint):
-            endpoint.jinja_env = self.jinja_env
+        endpoint.template_renderer = self.template_renderer
         self.endpoints.append(endpoint)
 
     def static(self, path):

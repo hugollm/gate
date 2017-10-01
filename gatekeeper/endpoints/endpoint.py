@@ -53,6 +53,7 @@ class Endpoint(object):
     def handle_request(self, request):
         self._fill_request_args(request)
         response = self._make_response()
+        self._set_response_template_renderer(response)
         request.set_response(response)
         self._execute_life_cycle(request, response)
         return response
@@ -65,6 +66,10 @@ class Endpoint(object):
 
     def _make_response(self):
         return Response()
+
+    def _set_response_template_renderer(self, response):
+        if getattr(self, 'template_renderer', None):
+            response.template_renderer = self.template_renderer
 
     def _execute_life_cycle(self, request, response):
         method = getattr(self, request.method.lower())
@@ -88,3 +93,6 @@ class Endpoint(object):
             if hasattr(self, 'on_exception'):
                 self.on_exception(request, e)
             raise
+
+    def render(self, template_identifier, context=None):
+        return self.template_renderer.render(template_identifier, context)

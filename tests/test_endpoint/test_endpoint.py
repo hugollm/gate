@@ -2,6 +2,7 @@ from unittest import TestCase
 from unittest.mock import Mock
 
 from gatekeeper import Request, Response, Endpoint
+from gatekeeper.template_renderer import TemplateRenderer
 
 
 class EndpointTestCase(TestCase):
@@ -274,3 +275,31 @@ class EndpointTestCase(TestCase):
         response = endpoint.handle_request(request)
         self.assertFalse(endpoint.match_request(request))
         self.assertEqual(endpoint.foobar.call_count, 0)
+
+    def test_render_works_if_template_renderer_is_set(self):
+        renderer = TemplateRenderer()
+        renderer.add_directory('tests/test_endpoint/templates')
+        endpoint = Endpoint()
+        endpoint.template_renderer = renderer
+        self.assertEqual(endpoint.render('simple.html'), '<h1>Simple</h1>')
+
+    def test_render_fails_if_template_renderer_is_not_set(self):
+        endpoint = Endpoint()
+        with self.assertRaises(AttributeError):
+            endpoint.render('simple.html')
+
+    def test_render_can_provide_a_context_to_template(self):
+        renderer = TemplateRenderer()
+        renderer.add_directory('tests/test_endpoint/templates')
+        endpoint = Endpoint()
+        endpoint.template_renderer = renderer
+        text = endpoint.render('with_context.html', {'name': 'John'})
+        self.assertEqual(text, '<h1>Hello John</h1>')
+
+    def test_responses_made_by_endpoint_inherits_template_renderer_if_set(self):
+        renderer = TemplateRenderer()
+        endpoint = Endpoint()
+        endpoint.template_renderer = renderer
+        endpoint._execute_life_cycle = Mock()
+        response = endpoint.handle_request(Request({}))
+        self.assertEqual(response.template_renderer, renderer)

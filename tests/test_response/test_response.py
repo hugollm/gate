@@ -8,6 +8,7 @@ from unittest import TestCase
 from unittest.mock import Mock
 
 from gatekeeper import Response
+from gatekeeper.template_renderer import TemplateRenderer
 
 
 class ResponseTestCase(TestCase):
@@ -279,3 +280,31 @@ class ResponseTestCase(TestCase):
         response.unset_message('success')
         expected_cookie = 'MESSAGE:success=; Expires=Thu, 01 Jan 1970 00:00:00 GMT'
         self.assertIn(('Set-Cookie', expected_cookie), response._wsgi_headers())
+
+    def test_render_works_when_template_renderer_is_set(self):
+        renderer = TemplateRenderer()
+        renderer.add_directory('tests/test_response/templates')
+        response = Response()
+        response.template_renderer = renderer
+        response.render('simple.html')
+        self.assertEqual(response.body, b'<h1>Simple</h1>')
+
+    def test_render_fails_if_template_renderer_is_not_set(self):
+        response = Response()
+        with self.assertRaises(AttributeError):
+            response.render('simple.html')
+
+    def test_render_can_provide_a_context_to_template(self):
+        renderer = TemplateRenderer()
+        renderer.add_directory('tests/test_response/templates')
+        response = Response()
+        response.template_renderer = renderer
+        response.render('with_context.html', {'name': 'John'})
+        self.assertEqual(response.body, b'<h1>Hello John</h1>')
+
+    def test_render_method_returns_response(self):
+        renderer = TemplateRenderer()
+        renderer.add_directory('tests/test_response/templates')
+        response = Response()
+        response.template_renderer = renderer
+        self.assertEqual(response.render('simple.html'), response)

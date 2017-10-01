@@ -24,6 +24,10 @@ class Response(BaseException):
             value = str(value).encode('utf-8')
         self._body = value
 
+    def render(self, template_identifier, context=None):
+        self.body = self.template_renderer.render(template_identifier, context)
+        return self
+
     def redirect(self, uri):
         self.status = 303
         self.headers['Location'] = uri

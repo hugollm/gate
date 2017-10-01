@@ -3,6 +3,7 @@ from unittest.mock import Mock
 from .app_test_case import AppTestCase
 
 from gatekeeper import App, Endpoint
+from gatekeeper.template_renderer import TemplateRenderer
 from gatekeeper.exceptions import AmbiguousEndpoints
 
 
@@ -69,3 +70,8 @@ class AppEndpointTestCase(AppTestCase):
         start_response = Mock()
         with self.assertRaises(AmbiguousEndpoints):
             app(env, start_response)
+
+    def test_app_sets_template_renderer_in_registered_endpoints(self):
+        app = App()
+        app.endpoint(Endpoint)
+        self.assertEqual(app.endpoints[0].template_renderer, app.template_renderer)
