@@ -12,52 +12,52 @@ class AppTemplateTestCase(AppTestCase):
 
     def test_set_jinja_env(self):
         app = App()
-        app.set_jinja_env({'tests.app_tests.hello': 'templates'})
+        app.set_jinja_env({'tests.test_app.hello': 'templates'})
         self.assertIsInstance(app.jinja_env, Environment)
 
     def test_render(self):
         app = App()
         app.set_jinja_env({
-            'tests.app_tests.base': 'templates',
-            'tests.app_tests.hello': 'templates',
+            'tests.test_app.base': 'templates',
+            'tests.test_app.hello': 'templates',
         })
-        text = app.render('tests.app_tests.hello/hello.html', {'name': 'John'})
+        text = app.render('tests.test_app.hello/hello.html', {'name': 'John'})
         self.assertEqual(text, '<body><h1>Hello John</h1></body>')
 
     def test_render_can_be_called_without_context(self):
         app = App()
         app.set_jinja_env({
-            'tests.app_tests.base': 'templates',
-            'tests.app_tests.hello': 'templates',
+            'tests.test_app.base': 'templates',
+            'tests.test_app.hello': 'templates',
         })
-        text = app.render('tests.app_tests.hello/hello.html')
+        text = app.render('tests.test_app.hello/hello.html')
         self.assertEqual(text, '<body><h1>Hello </h1></body>')
 
     def test_render_can_be_called_with_locals_as_context(self):
         app = App()
         app.set_jinja_env({
-            'tests.app_tests.base': 'templates',
-            'tests.app_tests.hello': 'templates',
+            'tests.test_app.base': 'templates',
+            'tests.test_app.hello': 'templates',
         })
         name = 'John'
-        text = app.render('tests.app_tests.hello/hello.html', locals())
+        text = app.render('tests.test_app.hello/hello.html', locals())
         self.assertEqual(text, '<body><h1>Hello John</h1></body>')
 
     def test_calling_render_without_setting_jinja_env_raises_exception(self):
         app = App()
         with self.assertRaises(JinjaEnvNotSet):
-            app.render('tests.app_tests.hello/hello.html')
+            app.render('tests.test_app.hello/hello.html')
 
     def test_html_responses_can_render_if_jinja_env_is_set_on_app(self):
         class Hello(HtmlEndpoint):
             path = '/'
             def get(self, request, response):
                 name = 'John'
-                response.render('tests.app_tests.hello/hello.html', locals())
+                response.render('tests.test_app.hello/hello.html', locals())
         app = App()
         app.set_jinja_env({
-            'tests.app_tests.base': 'templates',
-            'tests.app_tests.hello': 'templates',
+            'tests.test_app.base': 'templates',
+            'tests.test_app.hello': 'templates',
         })
         app.endpoint(Hello)
         expected_body = b'<body><h1>Hello John</h1></body>'
@@ -68,12 +68,12 @@ class AppTemplateTestCase(AppTestCase):
             path = '/'
             def get(self, request, response):
                 name = 'John'
-                response.render('tests.app_tests.hello/hello.html', locals())
+                response.render('tests.test_app.hello/hello.html', locals())
                 assert response.context == {'request': request, 'response': response, 'name': 'John'}
         app = App()
         app.set_jinja_env({
-            'tests.app_tests.base': 'templates',
-            'tests.app_tests.hello': 'templates',
+            'tests.test_app.base': 'templates',
+            'tests.test_app.hello': 'templates',
         })
         app.endpoint(Hello)
         self.assert_call(app, 'GET', '/', '200 OK')
@@ -83,7 +83,7 @@ class AppTemplateTestCase(AppTestCase):
             path = '/'
             def get(self, request, response):
                 name = 'John'
-                response.render('tests.app_tests.hello/hello.html', locals())
+                response.render('tests.test_app.hello/hello.html', locals())
         app = App()
         app.endpoint(Hello)
         with self.assertRaises(JinjaEnvNotSet):
@@ -97,8 +97,8 @@ class AppTemplateTestCase(AppTestCase):
                 assert response.jinja_env is not None
         app = App()
         app.set_jinja_env({
-            'tests.app_tests.base': 'templates',
-            'tests.app_tests.hello': 'templates',
+            'tests.test_app.base': 'templates',
+            'tests.test_app.hello': 'templates',
         })
         app.endpoint(WithJinjaEnv)
         self.assert_call(app, 'GET', '/', '200 OK')
@@ -111,8 +111,8 @@ class AppTemplateTestCase(AppTestCase):
                 assert getattr(response, 'jinja_env', None) is None
         app = App()
         app.set_jinja_env({
-            'tests.app_tests.base': 'templates',
-            'tests.app_tests.hello': 'templates',
+            'tests.test_app.base': 'templates',
+            'tests.test_app.hello': 'templates',
         })
         app.endpoint(NoJinjaEnv)
         self.assert_call(app, 'GET', '/', '200 OK')
@@ -120,8 +120,8 @@ class AppTemplateTestCase(AppTestCase):
     def test_templates_are_in_autoescape_mode_by_default(self):
         app = App()
         app.set_jinja_env({
-            'tests.app_tests.base': 'templates',
-            'tests.app_tests.hello': 'templates',
+            'tests.test_app.base': 'templates',
+            'tests.test_app.hello': 'templates',
         })
-        text = app.render('tests.app_tests.hello/markup.html', {'name': 'John'})
+        text = app.render('tests.test_app.hello/markup.html', {'name': 'John'})
         self.assertEqual(text, '<body>&lt;h1&gt;Hello World&lt;/h1&gt;</body>')
