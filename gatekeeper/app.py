@@ -1,7 +1,11 @@
+from importlib import import_module
+from inspect import getmembers, isclass
+from pkgutil import walk_packages, iter_modules
 import os.path
 
 from .requests.request import Request
 from .responses.response import Response
+from .endpoints.endpoint import Endpoint
 from .endpoints.html_endpoint import HtmlEndpoint
 from .exceptions import AmbiguousEndpoints, JinjaEnvNotSet, InvalidDirectory
 from .template_renderer import TemplateRenderer
@@ -47,6 +51,21 @@ class App(object):
         if not os.path.isdir(path):
             raise InvalidDirectory(path)
         self.template_renderer.add_directory(path)
+
+    def package(self, path):
+        import_module(path) # ensure path is importable
+        self._register_package_endpoints(path)
+        self.template_renderer.add_package(path)
+
+    def _register_package_endpoints(self, package_path):
+        for loader, module_path, is_package in walk_packages(package_path):
+            if is_package or not module_path.startswith(package_path):
+                continue
+            module = import_module(module_path)
+            classes = getmembers(module, isclass)
+            for class_name, cls in classes:
+                if issubclass(cls, Endpoint) and getattr(cls, 'path'):
+                    self.endpoint(cls)
 
     def __call__(self, env, start_response):
         request = Request(env)
