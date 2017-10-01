@@ -9,7 +9,7 @@ class AppStaticTestCase(AppTestCase):
 
     def test_app_can_serve_static_content(self):
         app = App()
-        app.static('tests/test_app/static')
+        app.static('tests/test_app/resources/static1')
         expected_status = '200 OK'
         expected_headers = {
             'Content-Type': 'text/plain',
@@ -21,28 +21,28 @@ class AppStaticTestCase(AppTestCase):
 
     def test_app_can_serve_css_static_content_in_subdirectory(self):
         app = App()
-        app.static('tests/test_app/static')
+        app.static('tests/test_app/resources/static1')
         expected_status = '200 OK'
         expected_headers = {
             'Content-Type': 'text/css',
             'Content-Length': '32',
-            'Content-Disposition': 'inline; filename="main.css"',
+            'Content-Disposition': 'inline; filename="simple.css"',
         }
         expected_body = b'body { margin: 0; padding: 0; }\n'
-        self.assert_call(app, 'GET', '/css/main.css', expected_status, expected_headers, expected_body)
+        self.assert_call(app, 'GET', '/css/simple.css', expected_status, expected_headers, expected_body)
 
     def test_registered_static_path_may_end_in_slash_or_not(self):
         app = App()
-        app.static('tests/test_app/static')
+        app.static('tests/test_app/resources/static1')
         self.assert_call(app, 'GET', '/robots.txt', '200 OK')
         app = App()
-        app.static('tests/test_app/static/')
+        app.static('tests/test_app/resources/static1/')
         self.assert_call(app, 'GET', '/robots.txt', '200 OK')
 
     def test_registering_static_content_fails_if_path_is_not_directory(self):
         app = App()
         with self.assertRaises(InvalidDirectory):
-            app.static('tests/test_app/static/robots.txt')
+            app.static('tests/test_app/resources/static1/robots.txt')
 
     def test_static_files_have_priority_over_endpoints(self):
         class Hello(Endpoint):
@@ -51,12 +51,12 @@ class AppStaticTestCase(AppTestCase):
                 response.body = b'hello world'
         app = App()
         app.endpoint(Hello)
-        app.static('tests/test_app/static')
+        app.static('tests/test_app/resources/static1')
         self.assert_call(app, 'GET', '/robots.txt', None, None, b'User-agent: *\nDisallow: /\n')
 
     def test_app_can_serve_static_content_from_multiple_directories(self):
         app = App()
-        app.static('tests/test_app/static')
-        app.static('tests/test_app/static2')
+        app.static('tests/test_app/resources/static1')
+        app.static('tests/test_app/resources/static2')
         self.assert_call(app, 'GET', '/robots.txt', '200 OK')
         self.assert_call(app, 'GET', '/readme.txt', '200 OK')
