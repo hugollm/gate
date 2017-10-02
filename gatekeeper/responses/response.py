@@ -57,6 +57,7 @@ class Response(BaseException):
         self.headers['Content-Disposition'] = 'attachment' if download else 'inline'
         self.headers['Content-Disposition'] += '; filename="{}"'.format(name or os.path.basename(path))
         self.headers['Content-Length'] = str(os.stat(path).st_size)
+        return self
 
     def set_cookie(self, key, value, expires=None, domain=None, path=None, secure=False, http_only=True, same_site=True):
         cookie = SimpleCookie({key: value}).get(key).OutputString()

@@ -190,6 +190,12 @@ class ResponseTestCase(TestCase):
         with self.assertRaises(FileNotFoundError):
             response.file('foobar.file')
 
+    def test_file_method_returns_the_response(self):
+        response = Response()
+        with NamedTemporaryFile() as tmpfile:
+            returned_value = response.file(tmpfile.name)
+        self.assertEqual(returned_value, response)
+
     def test_response_object_can_be_raised(self):
         response = Response()
         with self.assertRaises(Response):
