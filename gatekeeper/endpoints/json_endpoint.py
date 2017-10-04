@@ -12,6 +12,4 @@ class JsonEndpoint(Endpoint):
 
     def handle_request(self, request):
         request = JsonRequest(request.env)
-        response = super(JsonEndpoint, self).handle_request(request)
-        response.body = json.dumps(response.json)
-        return response
+        return super(JsonEndpoint, self).handle_request(request)
