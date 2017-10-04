@@ -55,8 +55,7 @@ class Endpoint(object):
         response = self._make_response()
         self._set_response_template_renderer(response)
         request.set_response(response)
-        self._execute_life_cycle(request, response)
-        return response
+        return self._execute_life_cycle(request, response)
 
     def _fill_request_args(self, request):
         request.args = {}
@@ -78,8 +77,8 @@ class Endpoint(object):
                 self.before_request(request, response)
             if request.method in self._allowed_methods:
                 method(request, response)
-        except Response:
-            pass
+        except Response as raised_response:
+            response = raised_response
         except Exception as e:
             if hasattr(self, 'on_exception'):
                 self.on_exception(request, e)
@@ -87,12 +86,13 @@ class Endpoint(object):
         try:
             if hasattr(self, 'after_request'):
                 self.after_request(request, response)
-        except Response:
-            pass
+        except Response as raised_response:
+            response = raised_response
         except Exception as e:
             if hasattr(self, 'on_exception'):
                 self.on_exception(request, e)
             raise
+        return response
 
     def render(self, template_identifier, context=None):
         return self.template_renderer.render(template_identifier, context)

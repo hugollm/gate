@@ -201,6 +201,49 @@ class EndpointTestCase(TestCase):
         response = endpoint.handle_request(request)
         self.assertEqual(response.body, b'hello world')
 
+    def test_raised_response_in_before_request_replaces_endpoint_response(self):
+        class RaiseEndpoint(Endpoint):
+            path = '/users'
+            def before_request(self, request, response):
+                response.body = b'hello'
+                res = Response()
+                res.body = b'world'
+                raise res
+            def get(self, request, response):
+                pass
+        endpoint = RaiseEndpoint()
+        request = Request({'REQUEST_METHOD': 'GET', 'PATH_INFO': '/users'})
+        response = endpoint.handle_request(request)
+        self.assertEqual(response.body, b'world')
+
+    def test_raised_response_in_main_method_replaces_endpoint_response(self):
+        class RaiseEndpoint(Endpoint):
+            path = '/users'
+            def get(self, request, response):
+                response.body = b'hello'
+                res = Response()
+                res.body = b'world'
+                raise res
+        endpoint = RaiseEndpoint()
+        request = Request({'REQUEST_METHOD': 'GET', 'PATH_INFO': '/users'})
+        response = endpoint.handle_request(request)
+        self.assertEqual(response.body, b'world')
+
+    def test_raised_response_in_after_request_replaces_endpoint_response(self):
+        class RaiseEndpoint(Endpoint):
+            path = '/users'
+            def after_request(self, request, response):
+                response.body = b'hello'
+                res = Response()
+                res.body = b'world'
+                raise res
+            def get(self, request, response):
+                pass
+        endpoint = RaiseEndpoint()
+        request = Request({'REQUEST_METHOD': 'GET', 'PATH_INFO': '/users'})
+        response = endpoint.handle_request(request)
+        self.assertEqual(response.body, b'world')
+
     def test_endpoint_sets_response_in_request(self):
         class SetResponseEndpoint(Endpoint):
             path = '/users'
@@ -297,9 +340,13 @@ class EndpointTestCase(TestCase):
         self.assertEqual(text, '<h1>Hello John</h1>')
 
     def test_responses_made_by_endpoint_inherits_template_renderer_if_set(self):
+        class RendererEndpoint(Endpoint):
+            path = '/users'
+            def get(self, request, response):
+                response.body = b'hello world'
         renderer = TemplateRenderer()
-        endpoint = Endpoint()
+        endpoint = RendererEndpoint()
         endpoint.template_renderer = renderer
-        endpoint._execute_life_cycle = Mock()
-        response = endpoint.handle_request(Request({}))
+        request = Request({'REQUEST_METHOD': 'GET', 'PATH_INFO': '/users'})
+        response = endpoint.handle_request(request)
         self.assertEqual(response.template_renderer, renderer)
