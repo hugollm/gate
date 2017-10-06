@@ -142,7 +142,7 @@ class RequestTestCase(TestCase):
         env = mock_env()
         env['HTTP_COOKIE'] = 'MESSAGE:foo=bar; MESSAGE:bar=biz'
         request = Request(env)
-        request.set_response(Response())
+        request.response = Response()
         self.assertEqual(request.messages, {'foo': 'bar', 'bar': 'biz'})
 
     def test_accessing_messages_requires_a_response_to_be_set(self):
@@ -156,7 +156,7 @@ class RequestTestCase(TestCase):
         env['HTTP_COOKIE'] = 'MESSAGE:foo=bar; MESSAGE:bar=biz'
         request = Request(env)
         response = Response()
-        request.set_response(response)
+        request.response = response
         request.messages
         expected_cookie = 'MESSAGE:foo=; Expires=Thu, 01 Jan 1970 00:00:00 GMT'
         self.assertIn(('Set-Cookie', expected_cookie), response._wsgi_headers())

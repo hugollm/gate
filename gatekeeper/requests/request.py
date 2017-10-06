@@ -15,9 +15,6 @@ class Request(object):
         self._cookies = None
         self._messages = None
 
-    def set_response(self, response):
-        self.response = response
-
     @property
     def method(self):
         return self.env['REQUEST_METHOD']
