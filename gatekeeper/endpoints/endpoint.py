@@ -1,5 +1,7 @@
 import re
+
 from ..responses.response import Response
+from ..exceptions import TemplateRendererNotSet
 
 
 class Endpoint(object):
@@ -10,6 +12,7 @@ class Endpoint(object):
     def __init__(self):
         self._compiled_regex = None
         self._compile_regex_if_needed()
+        self.template_renderer = None
 
     def _compile_regex_if_needed(self):
         regex = self._path_regex()
@@ -95,4 +98,6 @@ class Endpoint(object):
         return response
 
     def render(self, template_identifier, context=None):
+        if self.template_renderer is None:
+            raise TemplateRendererNotSet()
         return self.template_renderer.render(template_identifier, context)

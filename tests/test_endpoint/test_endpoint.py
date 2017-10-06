@@ -3,6 +3,7 @@ from unittest.mock import Mock
 
 from gatekeeper import Request, Response, Endpoint
 from gatekeeper.template_renderer import TemplateRenderer
+from gatekeeper.exceptions import TemplateRendererNotSet
 
 
 class EndpointTestCase(TestCase):
@@ -328,7 +329,7 @@ class EndpointTestCase(TestCase):
 
     def test_render_fails_if_template_renderer_is_not_set(self):
         endpoint = Endpoint()
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(TemplateRendererNotSet):
             endpoint.render('simple.html')
 
     def test_render_can_provide_a_context_to_template(self):

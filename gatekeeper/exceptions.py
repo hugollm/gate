@@ -5,6 +5,13 @@ class ResponseNotSet(Exception):
         super(ResponseNotSet, self).__init__(message)
 
 
+class TemplateRendererNotSet(Exception):
+
+    def __init__(self):
+        message = 'Rendering templates requires a template renderer to be set'
+        super(TemplateRendererNotSet, self).__init__(message)
+
+
 class UploadTargetAlreadyExists(Exception):
 
     def __init__(self):

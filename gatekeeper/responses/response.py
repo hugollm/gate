@@ -1,8 +1,10 @@
 from datetime import datetime
-import mimetypes
-import os
 from http.client import responses as STATUS_MESSAGES
 from http.cookies import SimpleCookie
+import mimetypes
+import os
+
+from ..exceptions import TemplateRendererNotSet
 
 
 class Response(BaseException):
@@ -13,6 +15,7 @@ class Response(BaseException):
         self.cookies = []
         self._body = b''
         self._file = None
+        self.template_renderer = None
 
     @property
     def body(self):
@@ -25,6 +28,8 @@ class Response(BaseException):
         self._body = value
 
     def render(self, template_identifier, context=None):
+        if self.template_renderer is None:
+            raise TemplateRendererNotSet()
         self.body = self.template_renderer.render(template_identifier, context)
         return self
 
