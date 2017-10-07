@@ -38,19 +38,20 @@ class App(object):
         self.template_renderer.add_directory(path)
 
     def package(self, path):
-        import_module(path) # ensure path is importable
         self._register_package_endpoints(path)
         self.template_renderer.add_package(path)
 
     def _register_package_endpoints(self, package_path):
-        for loader, module_path, is_package in walk_packages(package_path):
-            if is_package or not module_path.startswith(package_path):
-                continue
-            module = import_module(module_path)
-            classes = getmembers(module, isclass)
-            for class_name, cls in classes:
-                if issubclass(cls, Endpoint) and cls.__module__.startswith(package_path):
-                    self.endpoint(cls)
+        package = import_module(package_path)
+        for loader, module_path, is_package in walk_packages(package.__path__):
+            module = import_module('.' + module_path, package_path)
+            if is_package:
+                self._register_package_endpoints(module.__name__)
+            else:
+                classes = getmembers(module, isclass)
+                for class_name, cls in classes:
+                    if issubclass(cls, Endpoint) and cls.__module__.startswith(package_path):
+                        self.endpoint(cls)
 
     def __call__(self, env, start_response):
         request = Request(env)
