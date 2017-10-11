@@ -74,3 +74,14 @@ class TemplateRendererTestCase(TestCase):
         renderer.add_package('tests.test_template_renderer.resources.empty_package')
         text = renderer.render('tests.test_template_renderer.resources.package1/simple.html')
         self.assertEqual(text, '<h1>Simple</h1>')
+
+    def test_renderer_can_tell_if_theres_a_page_for_a_given_template_identifier(self):
+        renderer = TemplateRenderer()
+        renderer.add_directory('tests/test_template_renderer/resources/templates1')
+        self.assertEqual(renderer.has_page('simple.html'), True)
+        self.assertEqual(renderer.has_page('not_there.html'), False)
+
+    def test_renderer_has_page_does_not_account_for_package_templates(self):
+        renderer = TemplateRenderer()
+        renderer.add_package('tests.test_template_renderer.resources.package1')
+        self.assertEqual(renderer.has_page('tests.test_template_renderer.resources.package1/simple.html'), False)

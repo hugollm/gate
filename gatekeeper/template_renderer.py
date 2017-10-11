@@ -1,3 +1,6 @@
+import os.path
+
+
 class TemplateRenderer(object):
 
     def __init__(self):
@@ -17,6 +20,13 @@ class TemplateRenderer(object):
         context = context or {}
         context.pop('self', None)
         return template.render(**context)
+
+    def has_page(self, template_identifier):
+        for directory in self.directories:
+            full_path = os.path.join(directory, template_identifier)
+            if os.path.isfile(full_path):
+                return True
+        return False
 
     def _set_env_once(self):
         if self.jinja_env:

@@ -83,28 +83,15 @@ class App(object):
     def _try_response_from_page(self, request):
         page = request.path.strip('/')
         if os.path.basename(page) == 'index':
-            return None
-        for directory in self.template_renderer.directories:
-            if page:
-                response = self._try_page(directory, page)
-                if response:
-                    return response
-            response = self._try_page(directory, page, index=True)
-            if response:
+            return None # index pages should not be referenced explicitly
+        regular_template_path = page + '.html' if page else None
+        index_template_path = (page + '/index.html').strip('/')
+        for template_path in (regular_template_path, index_template_path):
+            if template_path and self.template_renderer.has_page(template_path):
+                response = Response()
+                response.headers['Content-Type'] = 'text/html; charset=utf-8'
+                response.body = self.template_renderer.render(template_path)
                 return response
-        return None
-
-    def _try_page(self, directory, page, index=False):
-        template_path = page
-        if index:
-            template_path += '/index'
-        template_path += '.html'
-        full_path = os.path.join(directory, template_path.lstrip('/'))
-        if os.path.isfile(full_path):
-            response = Response()
-            response.headers['Content-Type'] = 'text/html; charset=utf-8'
-            response.body = self.template_renderer.render(template_path)
-            return response
         return None
 
     def _try_response_from_an_endpoint(self, request):
@@ -127,9 +114,6 @@ class App(object):
     def _try_rendering_status_page(self, response):
         if isinstance(response, HtmlResponse) and not response.body:
             template_path = str(response.status) + '.html'
-            for directory in self.template_renderer.directories:
-                full_path = os.path.join(directory, template_path)
-                if os.path.isfile(full_path):
-                    response.body = self.template_renderer.render(template_path)
-                    break
+            if self.template_renderer.has_page(template_path):
+                response.body = self.template_renderer.render(template_path)
         return None
