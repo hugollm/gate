@@ -12,7 +12,7 @@ class AppEndpointTestCase(AppTestCase):
     def test_app_without_endpoints_responds_with_404(self):
         app = App()
         expected_status = '404 Not Found'
-        expected_headers = {'Content-Type': 'text/plain; charset=utf-8', 'Content-Length': '0'}
+        expected_headers = {'Content-Type': 'text/html; charset=utf-8', 'Content-Length': '0'}
         expected_body = b''
         self.assert_call(app, 'GET', '/', expected_status, expected_headers, expected_body)
 
@@ -36,7 +36,7 @@ class AppEndpointTestCase(AppTestCase):
         app = App()
         app.endpoint(Hello)
         expected_status = '404 Not Found'
-        expected_headers = {'Content-Type': 'text/plain; charset=utf-8', 'Content-Length': '0'}
+        expected_headers = {'Content-Type': 'text/html; charset=utf-8', 'Content-Length': '0'}
         expected_body = b''
         self.assert_call(app, 'GET', '/world', expected_status, expected_headers, expected_body)
 

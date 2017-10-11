@@ -5,8 +5,8 @@ import os.path
 
 from .requests.request import Request
 from .responses.response import Response
+from .responses.html_response import HtmlResponse
 from .endpoints.endpoint import Endpoint
-from .endpoints.html_endpoint import HtmlEndpoint
 from .exceptions import AmbiguousEndpoints, InvalidDirectory
 from .template_renderer import TemplateRenderer
 
@@ -56,6 +56,7 @@ class App(object):
     def __call__(self, env, start_response):
         request = Request(env)
         response = self.handle_request(request)
+        self._try_rendering_status_page(response)
         return response.wsgi(start_response)
 
     def handle_request(self, request):
@@ -119,6 +120,16 @@ class App(object):
         return None
 
     def _response_404(self):
-        response = Response()
+        response = HtmlResponse()
         response.status = 404
         return response
+
+    def _try_rendering_status_page(self, response):
+        if isinstance(response, HtmlResponse) and not response.body:
+            template_path = str(response.status) + '.html'
+            for directory in self.template_renderer.directories:
+                full_path = os.path.join(directory, template_path)
+                if os.path.isfile(full_path):
+                    response.body = self.template_renderer.render(template_path)
+                    break
+        return None
