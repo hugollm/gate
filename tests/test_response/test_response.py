@@ -112,6 +112,11 @@ class ResponseTestCase(TestCase):
         expected_body = 'blasé'.encode('utf-8')
         self.assert_response(response, expected_status, expected_headers, expected_body)
 
+    def test_header_keys_are_case_insensitive(self):
+        response = Response()
+        response.headers['foo'] = 'bar'
+        self.assertEqual(response.headers['FOO'], 'bar')
+
     def test_file_gets_returned_as_generator_to_wsgi(self):
         response = Response()
         with NamedTemporaryFile() as tmpfile:

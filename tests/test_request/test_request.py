@@ -87,6 +87,12 @@ class RequestTestCase(TestCase):
             'x-forwarded-for': '203.0.113.195, 70.41.3.18, 150.172.238.178',
         })
 
+    def test_header_keys_are_case_insensitive(self):
+        env = mock_env()
+        env['HTTP_AUTH'] = 'token'
+        request = Request(env)
+        self.assertEqual(request.headers['auTH'], 'token')
+
     def test_cookies(self):
         env = mock_env()
         env['HTTP_COOKIE'] = 'foo=bar; bar=biz'

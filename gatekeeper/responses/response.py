@@ -5,13 +5,14 @@ import mimetypes
 import os
 
 from ..exceptions import TemplateRendererNotSet
+from ..case_insensitive_dict import CaseInsensitiveDict
 
 
 class Response(BaseException):
 
     def __init__(self):
         self.status = 200
-        self.headers = {'Content-Type': 'text/plain; charset=utf-8'}
+        self.headers = CaseInsensitiveDict({'Content-Type': 'text/plain; charset=utf-8'})
         self.cookies = []
         self._body = b''
         self._file = None

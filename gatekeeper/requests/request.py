@@ -2,6 +2,7 @@ from http.cookies import SimpleCookie
 from urllib.parse import parse_qsl
 
 from ..exceptions import ResponseNotSet
+from ..case_insensitive_dict import CaseInsensitiveDict
 
 
 class Request(object):
@@ -55,7 +56,7 @@ class Request(object):
     @property
     def headers(self):
         if self._headers is None:
-            self._headers = {}
+            self._headers = CaseInsensitiveDict()
             for key, value in self.env.items():
                 if key.startswith('HTTP_'):
                     new_key = key[5:].lower().replace('_', '-')
