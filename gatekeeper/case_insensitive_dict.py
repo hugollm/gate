@@ -30,11 +30,11 @@ class CaseInsensitiveDict(MutableMapping):
         else:
             return self.to_dict() == data
 
+    def __repr__(self):
+        return str(self.to_dict())
+
     def to_dict(self):
-        return {key: self[key] for key in self}
+        return dict(self._data.values())
 
     def to_normalized_dict(self):
         return {key.lower(): self[key] for key in self}
-
-    def __repr__(self):
-        return str(dict(self._data.values()))
