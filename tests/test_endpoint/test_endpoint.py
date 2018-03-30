@@ -245,15 +245,6 @@ class EndpointTestCase(TestCase):
         response = endpoint.handle_request(request)
         self.assertEqual(response.body, b'world')
 
-    def test_endpoint_sets_response_in_request(self):
-        class SetResponseEndpoint(Endpoint):
-            path = '/users'
-            def get(self, request, response):
-                assert isinstance(request.response, Response)
-        endpoint = SetResponseEndpoint()
-        request = Request({'REQUEST_METHOD': 'GET', 'PATH_INFO': '/users'})
-        endpoint.handle_request(request)
-
     def test_on_exception_method_gets_called_if_an_unexpected_exception_raises(self):
         class CustomException(Exception):
             pass

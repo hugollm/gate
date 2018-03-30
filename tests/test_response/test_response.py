@@ -281,18 +281,6 @@ class ResponseTestCase(TestCase):
         expected_cookie = 'token=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Domain=my.domain.com; Path=/foo'
         self.assertIn(('Set-Cookie', expected_cookie), response._wsgi_headers())
 
-    def test_set_message_sets_a_cookie_with_a_prefix(self):
-        response = Response()
-        response.set_message('success', 'Operation completed')
-        expected_cookie = 'MESSAGE:success="Operation completed"'
-        self.assertIn(('Set-Cookie', expected_cookie), response._wsgi_headers())
-
-    def test_unset_message_unsets_a_cookie_with_a_prefix(self):
-        response = Response()
-        response.unset_message('success')
-        expected_cookie = 'MESSAGE:success=; Expires=Thu, 01 Jan 1970 00:00:00 GMT'
-        self.assertIn(('Set-Cookie', expected_cookie), response._wsgi_headers())
-
     def test_render_works_when_template_renderer_is_set(self):
         renderer = TemplateRenderer()
         renderer.add_directory('tests/test_response/templates')

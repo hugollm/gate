@@ -57,7 +57,6 @@ class Endpoint(object):
         self._fill_request_args(request)
         response = self._make_response()
         self._set_response_template_renderer(response)
-        request.response = response
         return self._execute_life_cycle(request, response)
 
     def _fill_request_args(self, request):

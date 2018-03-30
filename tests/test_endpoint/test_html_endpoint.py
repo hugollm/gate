@@ -13,7 +13,7 @@ class HtmlEndpointTestCase(TestCase):
                 assert isinstance(request, HtmlRequest)
         endpoint = HtmlTestEndpoint()
         request = Request({'REQUEST_METHOD': 'GET', 'PATH_INFO': '/'})
-        response = endpoint.handle_request(request)
+        endpoint.handle_request(request)
 
     def test_response_has_correct_content_type(self):
         endpoint = HtmlEndpoint()
@@ -21,3 +21,12 @@ class HtmlEndpointTestCase(TestCase):
         request = Request({'REQUEST_METHOD': 'GET', 'PATH_INFO': '/'})
         response = endpoint.handle_request(request)
         self.assertEqual(response.headers['Content-Type'], 'text/html; charset=utf-8')
+
+    def test_endpoint_sets_response_in_request(self):
+        class HtmlTestEndpoint(HtmlEndpoint):
+            path = '/'
+            def get(self, request, response):
+                assert request.response is response
+        endpoint = HtmlTestEndpoint()
+        request = Request({'REQUEST_METHOD': 'GET', 'PATH_INFO': '/'})
+        endpoint.handle_request(request)

@@ -2,8 +2,8 @@ import os
 from unittest import TestCase
 from warnings import catch_warnings
 
-from gatekeeper import HtmlRequest
-from gatekeeper.exceptions import UploadTargetAlreadyExists
+from gatekeeper import HtmlRequest, HtmlResponse
+from gatekeeper.exceptions import UploadTargetAlreadyExists, ResponseNotSet
 from .factory import mock_env
 
 
@@ -134,3 +134,28 @@ class HtmlRequestTestCase(TestCase):
         with catch_warnings(record=True) as w:
             request.files
             self.assertEqual(len(w), 1)
+
+    def test_messages(self):
+        env = mock_env()
+        env['HTTP_COOKIE'] = 'MESSAGE:foo=bar; MESSAGE:bar=biz'
+        request = HtmlRequest(env)
+        request.response = HtmlResponse()
+        self.assertEqual(request.messages, {'foo': 'bar', 'bar': 'biz'})
+
+    def test_accessing_messages_requires_a_response_to_be_set(self):
+        env = mock_env()
+        request = HtmlRequest(env)
+        with self.assertRaises(ResponseNotSet):
+            request.messages
+
+    def test_accessing_messages_unsets_message_cookies(self):
+        env = mock_env()
+        env['HTTP_COOKIE'] = 'MESSAGE:foo=bar; MESSAGE:bar=biz'
+        request = HtmlRequest(env)
+        response = HtmlResponse()
+        request.response = response
+        request.messages
+        expected_cookie = 'MESSAGE:foo=; Expires=Thu, 01 Jan 1970 00:00:00 GMT'
+        self.assertIn(('Set-Cookie', expected_cookie), response._wsgi_headers())
+        expected_cookie = 'MESSAGE:bar=; Expires=Thu, 01 Jan 1970 00:00:00 GMT'
+        self.assertIn(('Set-Cookie', expected_cookie), response._wsgi_headers())

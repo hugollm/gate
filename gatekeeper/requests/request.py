@@ -1,7 +1,6 @@
 from http.cookies import SimpleCookie
 from urllib.parse import parse_qsl
 
-from ..exceptions import ResponseNotSet
 from ..case_insensitive_dict import CaseInsensitiveDict
 
 
@@ -9,7 +8,6 @@ class Request(object):
 
     def __init__(self, env):
         self.env = env
-        self.response = None
         self._body = None
         self._query = None
         self._headers = None
@@ -74,19 +72,6 @@ class Request(object):
             else:
                 self._cookies = {}
         return self._cookies
-
-    @property
-    def messages(self):
-        if self.response is None:
-            raise ResponseNotSet()
-        if self._messages is None:
-            self._messages = {}
-            for key in self.cookies:
-                if key.startswith('MESSAGE:'):
-                    message_key = key[8:]
-                    self._messages[message_key] = self.cookies[key]
-                    self.response.unset_message(message_key)
-        return self._messages
 
     @property
     def body(self):

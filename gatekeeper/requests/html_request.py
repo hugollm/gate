@@ -4,12 +4,14 @@ from warnings import warn
 
 from .request import Request
 from .uploaded_file import UploadedFile
+from ..exceptions import ResponseNotSet
 
 
 class HtmlRequest(Request):
 
     def __init__(self, env):
         super(HtmlRequest, self).__init__(env)
+        self.response = None
         self._form = None
         self._files = None
         self._cgi_form = None
@@ -54,3 +56,16 @@ class HtmlRequest(Request):
             return files
         else:
             return UploadedFile(item)
+
+    @property
+    def messages(self):
+        if self.response is None:
+            raise ResponseNotSet()
+        if self._messages is None:
+            self._messages = {}
+            for key in self.cookies:
+                if key.startswith('MESSAGE:'):
+                    message_key = key[8:]
+                    self._messages[message_key] = self.cookies[key]
+                    self.response.unset_message(message_key)
+        return self._messages
