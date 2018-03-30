@@ -14,6 +14,18 @@ class Request(object):
         self._cookies = None
         self._messages = None
 
+    def __str__(self):
+        return self.to_str()
+
+    def __repr__(self):
+        return self.to_str()
+
+    def to_str(self):
+        cls = type(self).__name__
+        method = self.env.get('REQUEST_METHOD', '')
+        path = self.env.get('PATH_INFO', '')
+        return '<{}:{}:{}>'.format(cls, method, path)
+
     @property
     def method(self):
         return self.env['REQUEST_METHOD']

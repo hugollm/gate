@@ -8,6 +8,14 @@ from .factory import mock_env
 
 class RequestTestCase(TestCase):
 
+    def test_string_representation(self):
+        env = mock_env()
+        env['REQUEST_METHOD'] = 'POST'
+        env['PATH_INFO'] = '/dashboard/products'
+        request = Request(env)
+        self.assertEqual(str(request), '<Request:POST:/dashboard/products>')
+        self.assertEqual(repr(request), '<Request:POST:/dashboard/products>')
+
     def test_request_method(self):
         env = mock_env()
         request = Request(env)
