@@ -14,6 +14,11 @@ from gatekeeper.exceptions import TemplateRendererNotSet
 
 class ResponseTestCase(TestCase):
 
+    def test_string_representation(self):
+        response = Response()
+        self.assertEqual(str(response), '<Response:1h:0b>')
+        self.assertEqual(repr(response), '<Response:1h:0b>')
+
     def assert_response(self, response, expected_status=None, expected_headers=None, expected_body=None):
         start_response = Mock()
         body = response.wsgi(start_response)

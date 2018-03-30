@@ -18,6 +18,18 @@ class Response(BaseException):
         self._file = None
         self.template_renderer = None
 
+    def __str__(self):
+        return self.to_str()
+
+    def __repr__(self):
+        return self.to_str()
+
+    def to_str(self):
+        cls = type(self).__name__
+        headers = len(self.headers)
+        bytes = len(self._body)
+        return '<{}:{}h:{}b>'.format(cls, headers, bytes)
+
     @property
     def body(self):
         return self._body
